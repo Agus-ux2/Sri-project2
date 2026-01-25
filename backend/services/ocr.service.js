@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const pdfParse = require('pdf-parse');
+const env = require('../config/env');
 
 class OCRService {
     /**
@@ -18,9 +19,20 @@ class OCRService {
         try {
             let dataBuffer;
 
+            // 1. INTENTO NANONETS (Solo si es URL remota y hay Keys)
+            if (env.NANONETS_API_KEY && env.NANONETS_MODEL_ID && (filePath.startsWith('http://') || filePath.startsWith('https://'))) {
+                try {
+                    return await this.processWithNanonets(filePath, docType);
+                } catch (e) {
+                    console.error("⚠️ Nanonets falló, usaré fallback local:", e.message);
+                    // Continuar con lógica local...
+                }
+            }
+
+            // 2. FALLBACK: PROCESAMIENTO LOCAL
             // Determinar si es URL remota o archivo local
             if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
-                console.log(`🌐 Descargando PDF remoto: ${filePath}`);
+                console.log(`🌐 Descargando PDF remoto (Fallback): ${filePath}`);
                 const fetch = require('node-fetch');
                 const response = await fetch(filePath);
                 if (!response.ok) throw new Error(`Error descargando archivo: ${response.statusText}`);
@@ -68,7 +80,53 @@ class OCRService {
     }
 
     /**
-     * Extraer campos de CP/CTG
+     * Procesar con Nanonets API
+     */
+    static async processWithNanonets(fileUrl, docType) {
+        console.log('🤖 Enviando archivo a Nanonets AI...');
+        const fetch = require('node-fetch');
+        const { URLSearchParams } = require('url');
+
+        const params = new URLSearchParams();
+        params.append('urls', fileUrl);
+
+        const response = await fetch(`https://app.nanonets.com/api/v2/OCR/Model/${env.NANONETS_MODEL_ID}/LabelUrls/`, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Basic ' + Buffer.from(`${env.NANONETS_API_KEY}:`).toString('base64'),
+            },
+            body: params
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`Nanonets Error ${response.status}: ${errText}`);
+        }
+
+        const data = await response.json();
+        const result = data.result && data.result[0];
+
+        if (!result) throw new Error("No devolvió resultados");
+
+        console.log('✨ Nanonets respondió exitosamente');
+
+        // Mapear predicciones
+        const fields = result.prediction.map(p => ({
+            label: p.label,
+            value: p.ocr_text,
+            confidence: p.score
+        }));
+
+        return {
+            filename: fileUrl.split('/').pop(),
+            extractionSource: 'NANONETS_AI',
+            confidenceScore: Math.round(result.score * 100) || 95,
+            datos: fields
+        };
+    }
+
+    /**
+     * Extraer campos de CP/CTG (Legacy Local)
      */
     static extractCPFields(text) {
         const fields = [];
