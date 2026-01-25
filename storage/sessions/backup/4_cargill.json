@@ -1,0 +1,12 @@
+{
+    "userId": 4,
+    "provider": "cargill",
+    "cookies": [
+        {
+            "name": "test_session",
+            "value": "test_value_12345",
+            "domain": ".cargill.com"
+        }
+    ],
+    "savedAt": "2026-01-24T21:13:00.000Z"
+}

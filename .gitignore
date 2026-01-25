@@ -1,0 +1,19 @@
+# Dependencias
+node_modules/
+
+# Datos Sensibles
+.env
+storage/sessions/*.json
+storage/uploads/*
+storage/database.sqlite
+logs/*.log
+
+# Temporales de Sistema
+.DS_Store
+Thumbs.db
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.local-browsers

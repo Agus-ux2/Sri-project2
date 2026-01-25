@@ -1,0 +1,12 @@
+{
+    "userId": 1,
+    "provider": "ldc",
+    "cookies": [
+        {
+            "name": "ldc_session",
+            "value": "test_ldc_value_67890",
+            "domain": ".ldc.com"
+        }
+    ],
+    "savedAt": "2026-01-24T20:45:00.000Z"
+}

@@ -1,0 +1,8 @@
+CPE: 1234-5678
+
+Peso Bruto: 30,500 kg
+Tara: 12,500 kg  
+Peso Neto: 18,000 kg
+
+Producto: Soja
+Destino: Puerto Rosario

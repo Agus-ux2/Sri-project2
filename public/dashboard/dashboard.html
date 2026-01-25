@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SRI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/assets/css/base.css">
+
+    <style>
+        body {
+            font-family: var(--font-sans);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            /* Fondo claro con imagen hero */
+            background-image: url('/assets/images/hero-background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.92) 0%,
+                    rgba(240, 245, 240, 0.88) 100%);
+            z-index: -1;
+        }
+
+        /* Sidebar blanco estilo premium */
+        .sidebar {
+            width: 280px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+            border-right: 1px solid var(--color-neutral-200);
+            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.02);
+        }
+
+
+        .nav-links {
+            flex: 1;
+            padding: var(--spacing-md);
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--color-neutral-600);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: var(--color-neutral-50);
+            color: var(--color-neutral-900);
+        }
+
+        .nav-item.active {
+            background: #e8f5e9;
+            /* Verde muy claro para el fondo de la píldora */
+            color: #2e7d32;
+            /* Verde oscuro para el texto activo */
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .user-profile {
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-top: 1px solid var(--color-neutral-200);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--color-primary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: 700;
+            font-size: var(--font-size-sm);
+        }
+
+        .user-info {
+            font-size: var(--font-size-sm);
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 700;
+            color: var(--color-neutral-900);
+        }
+
+        .user-role {
+            color: var(--color-neutral-600);
+            font-size: var(--font-size-xs);
+            margin-top: 2px;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: none;
+            color: var(--color-neutral-600);
+            cursor: pointer;
+            font-size: 16px;
+            padding: var(--spacing-xs);
+            transition: color var(--transition-fast);
+        }
+
+        .btn-logout:hover {
+            color: var(--color-error);
+        }
+
+        /* Main Content con fondo claro */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            overflow-y: auto;
+            padding: var(--spacing-2xl);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .page-title h1 {
+            margin: 0;
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            color: var(--color-neutral-900);
+        }
+
+        .page-subtitle {
+            color: var(--color-neutral-600);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-xs);
+        }
+
+        /* KPI Grid - Cards blancos con sombra */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .kpi-card {
+            background: white;
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--color-neutral-200);
+        }
+
+        .kpi-title {
+            font-size: var(--font-size-xs);
+            color: var(--color-neutral-600);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: var(--spacing-sm);
+            color: var(--color-neutral-900);
+        }
+
+        .kpi-trend {
+            font-size: var(--font-size-xs);
+            margin-top: var(--spacing-xs);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .trend-up {
+            color: var(--color-success);
+        }
+
+        .trend-down {
+            color: var(--color-error);
+        }
+
+        .trend-warning {
+            color: var(--color-warning);
+        }
+
+        /* Dashboard Section - Cards blancos */
+        .dashboard-section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--color-neutral-200);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .section-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--color-neutral-900);
+        }
+
+        .section-link {
+            font-size: var(--font-size-sm);
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .section-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Tabla de Actividad Premium */
+        .activity-table-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--color-neutral-200);
+        }
+
+        .activity-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .activity-table th {
+            background: #1a1a1a;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 16px 20px;
+            text-align: left;
+        }
+
+        .activity-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--color-neutral-100);
+            font-size: 0.9rem;
+            color: var(--color-neutral-700);
+            vertical-align: middle;
+        }
+
+        .activity-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .activity-table tr:hover td {
+            background: var(--color-neutral-50);
+        }
+
+        .doc-pill {
+            padding: 4px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+        }
+
+        .doc-cp {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .doc-ced {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .status-ok {
+            color: #2e7d32;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-ok::before {
+            content: '✓';
+            background: #2e7d32;
+            color: white;
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .progress-bar-bg {
+            height: 6px;
+            width: 100px;
+            background: var(--color-neutral-200);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--color-primary);
+            border-radius: 3px;
+        }
+
+        .progress-text {
+            font-size: var(--font-size-xs);
+            color: var(--color-neutral-600);
+        }
+
+        /* Alert Feed */
+        .alert-item {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--color-neutral-200);
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: flex-start;
+        }
+
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+
+        .alert-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 6px;
+        }
+
+        .alert-dot.error {
+            background: var(--color-error);
+        }
+
+        .alert-dot.success {
+            background: var(--color-success);
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .alert-title.error {
+            color: var(--color-error);
+        }
+
+        .alert-title.success {
+            color: var(--color-success);
+        }
+
+        .alert-description {
+            font-size: var(--font-size-sm);
+            color: var(--color-neutral-600);
+            line-height: 1.5;
+        }
+
+        .alert-link {
+            color: var(--color-primary);
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: var(--spacing-lg);
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="sidebar">
+        <div class="logo-area" style="padding: var(--spacing-xl) var(--spacing-lg);">
+            <img src="/assets/images/sri-logo.png" alt="SRI Logo" class="logo-img">
+            <div class="logo-text">Soluciones <span>Rurales</span></div>
+        </div>
+
+        <div class="nav-links">
+            <a href="/dashboard/dashboard.html" class="nav-item active">
+                <span class="nav-icon">📊</span> Dashboard
+            </a>
+            <a href="/dashboard/upload.html" class="nav-item">
+                <span class="nav-icon">📄</span> Carga de Documentos
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">🌾</span> Mis Granos
+            </a>
+            <a href="/dashboard/contracts.html" class="nav-item">
+                <span class="nav-icon">📋</span> Contratos
+            </a>
+            <a href="/dashboard/providers.html" class="nav-item">
+                <span class="nav-icon">📊</span> Proveedores
+            </a>
+            <a href="#" class="nav-item" id="logoutLink">
+                <span class="nav-icon">🚪</span> Salir
+            </a>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar" id="userAvatar">JP</div>
+            <div class="user-info">
+                <div class="user-name" id="userName">Juan Pérez</div>
+                <div class="user-role" id="userCompany">Estancia La Esperanza</div>
+            </div>
+            <button class="btn-logout" id="logoutBtn" title="Cerrar sesión">🔓</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-content">
+
+        <div class="header">
+            <div class="page-title">
+                <h1>Actividad Reciente</h1>
+            </div>
+        </div>
+
+        <div class="activity-table-container">
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>FECHA</th>
+                        <th>DOCUMENTO</th>
+                        <th>REFERENCIA</th>
+                        <th>DETALLE</th>
+                        <th>ESTADO</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTableBody">
+                    <tr>
+                        <td>9/1/2026</td>
+                        <td><span class="doc-pill doc-cp">Carta de Porte</span></td>
+                        <td>9801328</td>
+                        <td>Soja</td>
+                        <td><span class="status-ok">OK</span></td>
+                    </tr>
+                    <tr>
+                        <td>9/1/2026</td>
+                        <td><span class="doc-pill doc-ced">Análisis / CED</span></td>
+                        <td>---</td>
+                        <td>Soja</td>
+                        <td><span class="status-ok">OK</span></td>
+                    </tr>
+                    <tr>
+                        <td>9/1/2026</td>
+                        <td><span class="doc-pill doc-cp">Carta de Porte</span></td>
+                        <td>9801304</td>
+                        <td>Soja</td>
+                        <td><span class="status-ok">OK</span></td>
+                    </tr>
+                    <tr>
+                        <td>9/1/2026</td>
+                        <td><span class="doc-pill doc-ced">Análisis / CED</span></td>
+                        <td>---</td>
+                        <td>Soja</td>
+                        <td><span class="status-ok">OK</span></td>
+                    </tr>
+                    <tr>
+                        <td>9/1/2026</td>
+                        <td><span class="doc-pill doc-cp">Carta de Porte</span></td>
+                        <td>9801324</td>
+                        <td>Soja</td>
+                        <td><span class="status-ok">OK</span></td>
+                    </tr>
+                    <tr>
+                        <td>9/1/2026</td>
+                        <td><span class="doc-pill doc-ced">Análisis / CED</span></td>
+                        <td>---</td>
+                        <td>Soja</td>
+                        <td><span class="status-ok">OK</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FORENSIC ALERTS (FEED) -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <div class="section-title">Últimas Alertas de Auditoría (ARCA Match)</div>
+            </div>
+
+            <div class="alert-item">
+                <span class="alert-dot error"></span>
+                <div class="alert-content">
+                    <div class="alert-title error">Discrepancia de Humedad Detectada</div>
+                    <div class="alert-description">
+                        CPE 2930-4921 - El acopio descontó 420kg ignorando la cláusula de "2 Puntos Libres".
+                        <a href="#" class="alert-link">Ver Detalle</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert-item">
+                <span class="alert-dot success"></span>
+                <div class="alert-content">
+                    <div class="alert-title success">Paritaria Negociada OK</div>
+                    <div class="alert-description">
+                        Liquidación #99482 - Se verificó bonificación del 100% en gastos de sellado según lo pactado.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/session.js"></script>
+    <script>
+        // Verificar autenticación
+        if (!Session.isAuthenticated()) {
+            window.location.href = '/auth/login.html';
+        }
+
+        // Cargar datos del usuario
+        const user = Session.getUser();
+        if (user) {
+            document.getElementById('userName').textContent = user.name || 'Usuario';
+            document.getElementById('userCompany').textContent = user.company || 'Mi Empresa';
+
+            // Avatar con iniciales
+            const initials = user.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U';
+            document.getElementById('userAvatar').textContent = initials;
+        }
+
+        // Logout desde botón del sidebar
+        document.getElementById('logoutLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('¿Está seguro que desea cerrar sesión?')) {
+                Session.logout();
+                window.location.href = '/auth/login.html';
+            }
+        });
+
+        // Logout desde botón del perfil
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('¿Está seguro que desea cerrar sesión?')) {
+                Session.logout();
+                window.location.href = '/auth/login.html';
+            }
+        });
+    </script>
+</body>
+
+</html>

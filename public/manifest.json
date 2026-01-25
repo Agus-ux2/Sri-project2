@@ -1,0 +1,21 @@
+{
+    "name": "Soluciones Rurales Integradas",
+    "short_name": "SRI Agro",
+    "description": "Plataforma Inteligente para el Productor Agropecuario",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#0a0a0a",
+    "theme_color": "#2ecc71",
+    "icons": [
+        {
+            "src": "sri_pwa_icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "sri_pwa_icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
