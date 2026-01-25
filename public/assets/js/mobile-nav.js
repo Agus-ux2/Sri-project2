@@ -277,25 +277,34 @@ class MobileNavigation {
     }
 
     setupOfflineIndicator() {
+        // Helper to check if mobile
+        const isMobile = () => {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+        };
+
         // Create offline indicator
         const indicator = document.createElement('div');
         indicator.className = 'offline-indicator';
         indicator.textContent = '📡 Sin conexión - Modo offline';
         document.body.appendChild(indicator);
 
-        // Monitor online/offline status
-        window.addEventListener('online', () => {
-            indicator.classList.remove('show');
-        });
+        const updateStatus = () => {
+            if (!navigator.onLine && isMobile()) {
+                indicator.classList.add('show');
+            } else {
+                indicator.classList.remove('show');
+            }
+        };
 
-        window.addEventListener('offline', () => {
-            indicator.classList.add('show');
-        });
+        // Monitor online/offline status
+        window.addEventListener('online', updateStatus);
+        window.addEventListener('offline', updateStatus);
+
+        // Also update on resize in case they switch to mobile view simulation
+        window.addEventListener('resize', updateStatus);
 
         // Check initial state
-        if (!navigator.onLine) {
-            indicator.classList.add('show');
-        }
+        updateStatus();
     }
 }
 

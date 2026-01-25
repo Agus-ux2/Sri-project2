@@ -88,6 +88,15 @@ class PWAInstaller {
             return;
         }
 
+        // Check if mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+        // Only show strictly on mobile devices
+        if (!isMobile) {
+            console.log('[PWA] Skipping install button - not a mobile device');
+            return;
+        }
+
         // Create install button
         const button = document.createElement('button');
         button.id = 'pwa-install-btn';
