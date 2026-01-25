@@ -28,7 +28,7 @@ module.exports = {
 
     // OCR Nanonets
     NANONETS_API_KEY: process.env.NANONETS_API_KEY || '',
-    NANONETS_MODEL_ID: process.env.NANONETS_MODEL_ID || '',
+    NANONETS_MODEL_ID: process.env.NANONETS_MODEL_ID || 'f6aa2bdc-5baa-463f-8c26-8f01affec87d',
 
     // Cloudinary Storage
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
