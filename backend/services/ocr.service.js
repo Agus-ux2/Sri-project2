@@ -16,7 +16,20 @@ class OCRService {
      */
     static async processPDF(filePath, docType = 'CP') {
         try {
-            const dataBuffer = fs.readFileSync(filePath);
+            let dataBuffer;
+
+            // Determinar si es URL remota o archivo local
+            if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+                console.log(`🌐 Descargando PDF remoto: ${filePath}`);
+                const fetch = require('node-fetch');
+                const response = await fetch(filePath);
+                if (!response.ok) throw new Error(`Error descargando archivo: ${response.statusText}`);
+                dataBuffer = await response.buffer();
+            } else {
+                console.log(`📂 Leyendo archivo local: ${filePath}`);
+                dataBuffer = fs.readFileSync(filePath);
+            }
+
             const pdfData = await pdfParse(dataBuffer);
             const text = pdfData.text;
 

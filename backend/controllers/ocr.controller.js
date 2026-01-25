@@ -35,24 +35,22 @@ class OCRController {
                 });
             }
 
-            // TODO: Implementar procesamiento OCR real
-            // Por ahora, simular procesamiento
+            // Iniciar procesamiento asíncrono real
+            const OCRService = require('../services/ocr.service');
+
+            // No esperamos el await para no bloquear la respuesta (procesamiento background)
+            OCRService.processPDF(document.file_path, 'CP') // Default a CP, idealmente detectar tipo
+                .then(async (result) => {
+                    console.log('✅ OCR Completado para documento:', documentId);
+                    await DocumentModel.updateOCRStatus(documentId, 'completed', result);
+                })
+                .catch(async (error) => {
+                    console.error('❌ Error en OCR background:', error);
+                    await DocumentModel.updateOCRStatus(documentId, 'failed', { error: error.message });
+                });
+
+            // Actualizar estado inicial
             await DocumentModel.updateOCRStatus(documentId, 'processing');
-
-            // Simular delay de procesamiento
-            setTimeout(async () => {
-                const mockOCRData = {
-                    text: 'Contenido extraído del documento',
-                    confidence: 0.95,
-                    fields: {
-                        tipo_documento: 'CPE',
-                        numero: '123456789',
-                        fecha: '2026-01-20'
-                    }
-                };
-
-                await DocumentModel.updateOCRStatus(documentId, 'completed', mockOCRData);
-            }, 2000);
 
             res.json({
                 message: 'Procesamiento OCR iniciado',
