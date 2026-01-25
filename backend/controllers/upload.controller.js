@@ -44,7 +44,7 @@ class UploadController {
             });
 
             // Procesar archivos async
-            UploadController.processFiles(taskId, req.files, docType);
+            UploadController.processFiles(taskId, req.files, docType, req.user.id);
 
             res.json({
                 taskId,
