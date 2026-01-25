@@ -4,84 +4,69 @@
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  */
 
-const { getDatabase } = require('../config/database');
+const { query } = require('../config/database');
 
 class DocumentModel {
     /**
      * Crear nuevo documento
      */
-    static create(documentData) {
-        return new Promise((resolve, reject) => {
-            const db = getDatabase();
-            const { user_id, filename, original_name, file_path, file_type, file_size } = documentData;
+    static async create(documentData) {
+        const { user_id, filename, original_name, file_path, file_type, file_size } = documentData;
 
-            db.run(
-                `INSERT INTO documents (user_id, filename, original_name, file_path, file_type, file_size)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-                [user_id, filename, original_name, file_path, file_type, file_size],
-                function (err) {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve({ id: this.lastID, ...documentData });
-                    }
-                }
-            );
-        });
+        const text = `
+            INSERT INTO documents (user_id, filename, original_name, file_path, file_type, file_size)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING *
+        `;
+
+        const values = [user_id, filename, original_name, file_path, file_type, file_size];
+
+        try {
+            const result = await query(text, values);
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
     }
 
     /**
      * Buscar documentos por usuario
      */
-    static findByUserId(userId) {
-        return new Promise((resolve, reject) => {
-            const db = getDatabase();
-
-            db.all(
-                `SELECT * FROM documents WHERE user_id = ? ORDER BY created_at DESC`,
-                [userId],
-                (err, rows) => {
-                    if (err) reject(err);
-                    else resolve(rows);
-                }
-            );
-        });
+    static async findByUserId(userId) {
+        const text = `SELECT * FROM documents WHERE user_id = $1 ORDER BY created_at DESC`;
+        try {
+            const result = await query(text, [userId]);
+            return result.rows;
+        } catch (error) {
+            throw error;
+        }
     }
 
     /**
      * Buscar documento por ID
      */
-    static findById(id) {
-        return new Promise((resolve, reject) => {
-            const db = getDatabase();
-
-            db.get(
-                `SELECT * FROM documents WHERE id = ?`,
-                [id],
-                (err, row) => {
-                    if (err) reject(err);
-                    else resolve(row);
-                }
-            );
-        });
+    static async findById(id) {
+        const text = `SELECT * FROM documents WHERE id = $1`;
+        try {
+            const result = await query(text, [id]);
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
     }
 
     /**
      * Actualizar estado OCR
      */
-    static updateOCRStatus(id, status, ocrData = null) {
-        return new Promise((resolve, reject) => {
-            const db = getDatabase();
+    static async updateOCRStatus(id, status, ocrData = null) {
+        const text = `UPDATE documents SET ocr_status = $1, ocr_data = $2 WHERE id = $3`;
+        const values = [status, ocrData ? JSON.stringify(ocrData) : null, id];
 
-            db.run(
-                `UPDATE documents SET ocr_status = ?, ocr_data = ? WHERE id = ?`,
-                [status, ocrData ? JSON.stringify(ocrData) : null, id],
-                (err) => {
-                    if (err) reject(err);
-                    else resolve();
-                }
-            );
-        });
+        try {
+            await query(text, values);
+        } catch (error) {
+            throw error;
+        }
     }
 }
 
