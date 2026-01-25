@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'sri-v1.0.0';
+const CACHE_VERSION = 'sri-v1.0.1';
 const STATIC_CACHE = `sri-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `sri-dynamic-${CACHE_VERSION}`;
 const API_CACHE = `sri-api-${CACHE_VERSION}`;

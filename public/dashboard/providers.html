@@ -3,10 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+
     <!-- PWA Meta Tags -->
-    <meta name="description" content="Dashboard de auditoría forense y control de gestión para productores agropecuarios">
+    <meta name="description"
+        content="Dashboard de auditoría forense y control de gestión para productores agropecuarios">
     <meta name="theme-color" content="#78b13f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -249,7 +251,8 @@
         </div>
     </div>
 
-    <script src="/assets/js/provider-fix.js"></script>    <script src="/assets/js/api.js?v=1.1"></script>
+    <script src="/assets/js/provider-fix.js"></script>
+    <script src="/assets/js/api.js?v=1.1"></script>
     <script src="/assets/js/session.js?v=1.1"></script>
     <script>
         const PROVIDERS = {
@@ -460,6 +463,75 @@
         });
 
         loadProviders();
+    </script>
+    <script>
+        // 🛠️ INLINE FIX: Provider Connection
+        (function () {
+            console.log("🏁 Cargando Fix Inline de Proveedores...");
+
+            const PROVIDER_LOGIN_URLS = {
+                cargill: "https://www.mycargill.com/cascsa/v2/login",
+                ldc: "https://mildc.com/webportal",
+                bunge: "https://operacionesbasa.bunge.ar/operacionesbasa/",
+                cofco: "https://ar.cofcointernational.com/acceso-clientes",
+                fyo: "https://www.fyodigital.com",
+                aca: "https://www.acabase.com.ar/index.asp#"
+            };
+
+            // Forzar override
+            window.startProviderLogin = function (provider, event) {
+                console.log(`🚀 (INLINE) Iniciando login para ${provider}`);
+                // Prevenir cualquier acción por defecto
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                const btn = event?.currentTarget || event?.target;
+                const originalText = btn ? btn.innerText : 'Conectar';
+
+                if (!PROVIDER_LOGIN_URLS[provider]) {
+                    alert(`❌ URL no configurada para ${provider}`);
+                    return;
+                }
+
+                // Abrir ventana inmediatamente
+                const providerWindow = window.open(
+                    PROVIDER_LOGIN_URLS[provider],
+                    `provider_${provider}`,
+                    'width=1200,height=800,menubar=yes,toolbar=yes,location=yes,status=yes,resizable=yes,scrollbars=yes'
+                );
+
+                if (!providerWindow) {
+                    alert('⚠️ Permite ventanas emergentes (pop-ups) para este sitio.');
+                    return;
+                }
+
+                // UI Update
+                if (btn) {
+                    btn.innerText = "Confirmar Conexión";
+                    btn.onclick = async (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        if (confirm(`¿Ya iniciaste sesión en ${provider.toUpperCase()}?`)) {
+                            try {
+                                await fetch('/api/providers/force-connect', {
+                                    method: 'POST',
+                                    headers: window.getAuthHeaders(),
+                                    body: JSON.stringify({ provider })
+                                });
+                                alert(`✅ Conectado con ${provider.toUpperCase()}`);
+                                loadProviders();
+                            } catch (err) {
+                                alert("Error al confirmar");
+                            }
+                        }
+                    };
+                }
+            };
+
+            console.log("✅ Fix Inline aplicado correctamente");
+        })();
     </script>
 </body>
 
