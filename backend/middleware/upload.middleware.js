@@ -32,13 +32,17 @@ const fileFilter = (req, file, cb) => {
         'image/jpeg',
         'image/jpg',
         'image/png',
-        'application/pdf'
+        'application/pdf',
+        'application/vnd.ms-excel', // .xls
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+        'text/csv',
+        'text/plain' // .txt
     ];
 
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error('Tipo de archivo no permitido. Solo se aceptan: JPG, PNG, PDF'), false);
+        cb(new Error('Tipo de archivo no permitido. Solo se aceptan: Images, PDF, Excel, TXT, CSV'), false);
     }
 };
 
