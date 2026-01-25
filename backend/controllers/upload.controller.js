@@ -94,9 +94,21 @@ class UploadController {
 
                     // 3. Procesar Contenido (OCR o Parser)
                     let result;
-                    if (file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/')) {
+
+                    // Robustez: Chequear extensión también por si el mimetype viene mal del browser
+                    const path = require('path');
+                    const ext = path.extname(file.originalname).toLowerCase();
+                    const isExcelOrTxt = ['.xlsx', '.xls', '.csv', '.txt'].includes(ext);
+
+                    const isPdfOrImage = (file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/')) && !isExcelOrTxt;
+
+                    if (isPdfOrImage) {
                         // Usar OCR (Nanonets o Local)
-                        result = await OCRService.processPDF(uploadResult.url, docType);
+                        let fileToProcess = uploadResult.url;
+                        if (uploadResult.storage_type === 'local') {
+                            fileToProcess = file.path;
+                        }
+                        result = await OCRService.processPDF(fileToProcess, docType);
                     } else {
                         // Usar Parser (Excel/Txt)
                         result = await ParserService.processFile(file.path, file.mimetype);
