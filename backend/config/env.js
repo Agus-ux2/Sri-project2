@@ -13,7 +13,8 @@ module.exports = {
     NODE_ENV: process.env.NODE_ENV || 'development',
 
     // Base de datos
-    DATABASE_PATH: process.env.DATABASE_PATH || path.join(__dirname, '../../storage/database.sqlite'),
+    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://localhost:5432/sri_db',
+    DATABASE_PATH: process.env.DATABASE_PATH || path.join(__dirname, '../../storage/database.sqlite'), // Legacy - para fallback
 
     // JWT
     JWT_SECRET: process.env.JWT_SECRET || 'sri-secret-key-change-in-production',

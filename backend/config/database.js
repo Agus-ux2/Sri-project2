@@ -1,145 +1,171 @@
 /**
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * CONFIGURACIÓN DE BASE DE DATOS SQLITE
+ * CONFIGURACIÓN DE BASE DE DATOS POSTGRESQL
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  */
 
-const sqlite3 = require('sqlite3').verbose();
-const fs = require('fs');
-const path = require('path');
+const { Pool } = require('pg');
 const env = require('./env');
 
-let db = null;
+let pool = null;
 
 /**
- * Inicializa la base de datos
+ * Inicializa el pool de conexiones a PostgreSQL
  */
 function initDatabase() {
-    return new Promise((resolve, reject) => {
-        // Crear directorio storage si no existe
-        const storageDir = path.dirname(env.DATABASE_PATH);
-        if (!fs.existsSync(storageDir)) {
-            fs.mkdirSync(storageDir, { recursive: true });
-        }
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Configurar pool de conexiones
+      const connectionString = process.env.DATABASE_URL ||
+        'postgresql://localhost:5432/sri_db';
 
-        // Crear/abrir base de datos
-        db = new sqlite3.Database(env.DATABASE_PATH, (err) => {
-            if (err) {
-                console.error('❌ Error abriendo base de datos:', err);
-                reject(err);
-                return;
-            }
+      pool = new Pool({
+        connectionString: connectionString,
+        ssl: process.env.NODE_ENV === 'production' ? {
+          rejectUnauthorized: false
+        } : false
+      });
 
-            console.log('✅ Base de datos SQLite conectada');
+      // Verificar conexión
+      const client = await pool.connect();
+      console.log('✅ PostgreSQL conectado exitosamente');
 
-            // Crear tablas
-            db.serialize(() => {
-                // Tabla de usuarios
-                db.run(`
-          CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT DEFAULT 'user',
-            email_verified INTEGER DEFAULT 0,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-          )
-        `, (err) => {
-                    if (err) console.error('Error creando tabla users:', err);
-                });
+      // Crear tablas si no existen
+      await createTables(client);
 
-                // Tabla de documentos
-                db.run(`
-          CREATE TABLE IF NOT EXISTS documents (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            filename TEXT NOT NULL,
-            original_name TEXT NOT NULL,
-            file_path TEXT NOT NULL,
-            file_type TEXT,
-            file_size INTEGER,
-            ocr_status TEXT DEFAULT 'pending',
-            ocr_data TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-          )
-        `, (err) => {
-                    if (err) console.error('Error creando tabla documents:', err);
-                });
-
-                // Tabla de tareas OCR
-                db.run(`
-          CREATE TABLE IF NOT EXISTS ocr_tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            document_id INTEGER NOT NULL,
-            status TEXT DEFAULT 'pending',
-            extracted_data TEXT,
-            error_message TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            completed_at DATETIME,
-            FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE
-          )
-        `, (err) => {
-                    if (err) console.error('Error creando tabla ocr_tasks:', err);
-                });
-
-                // Tabla de granos
-                db.run(`
-          CREATE TABLE IF NOT EXISTS grains (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            grain_type TEXT NOT NULL,
-            quantity REAL NOT NULL,
-            quality_grade TEXT,
-            humidity REAL,
-            location TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-          )
-        `, (err) => {
-                    if (err) console.error('Error creando tabla grains:', err);
-                });
-
-                // Tabla de contratos
-                db.run(`
-          CREATE TABLE IF NOT EXISTS contracts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            contract_number TEXT,
-            provider TEXT NOT NULL,
-            grain_type TEXT,
-            quantity REAL,
-            price REAL,
-            delivery_date DATE,
-            status TEXT DEFAULT 'active',
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-          )
-        `, (err) => {
-                    if (err) console.error('Error creando tabla contracts:', err);
-                    else console.log('✅ Tablas creadas correctamente');
-                    resolve(db);
-                });
-            });
-        });
-    });
+      client.release();
+      resolve(pool);
+    } catch (error) {
+      console.error('❌ Error conectando a PostgreSQL:', error);
+      reject(error);
+    }
+  });
 }
 
 /**
- * Obtiene instancia de la base de datos
+ * Crea las tablas necesarias
+ */
+async function createTables(client) {
+  try {
+    // Tabla de usuarios
+    await client.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                role VARCHAR(50) DEFAULT 'user',
+                email_verified BOOLEAN DEFAULT false,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+    // Tabla de documentos
+    await client.query(`
+            CREATE TABLE IF NOT EXISTS documents (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                filename VARCHAR(255) NOT NULL,
+                original_name VARCHAR(255) NOT NULL,
+                file_path TEXT NOT NULL,
+                file_type VARCHAR(100),
+                file_size INTEGER,
+                ocr_status VARCHAR(50) DEFAULT 'pending',
+                ocr_data TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+    // Tabla de tareas OCR
+    await client.query(`
+            CREATE TABLE IF NOT EXISTS ocr_tasks (
+                id SERIAL PRIMARY KEY,
+                document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+                status VARCHAR(50) DEFAULT 'pending',
+                extracted_data TEXT,
+                error_message TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                completed_at TIMESTAMP
+            )
+        `);
+
+    // Tabla de granos
+    await client.query(`
+            CREATE TABLE IF NOT EXISTS grains (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                grain_type VARCHAR(100) NOT NULL,
+                quantity DECIMAL(10, 2) NOT NULL,
+                quality_grade VARCHAR(50),
+                humidity DECIMAL(5, 2),
+                location VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+    // Tabla de contratos
+    await client.query(`
+            CREATE TABLE IF NOT EXISTS contracts (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                contract_number VARCHAR(100),
+                provider VARCHAR(100) NOT NULL,
+                grain_type VARCHAR(100),
+                quantity DECIMAL(10, 2),
+                price DECIMAL(10, 2),
+                delivery_date DATE,
+                status VARCHAR(50) DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+    console.log('✅ Tablas PostgreSQL creadas correctamente');
+  } catch (error) {
+    console.error('Error creando tablas:', error);
+    throw error;
+  }
+}
+
+/**
+ * Obtiene la instancia del pool
  */
 function getDatabase() {
-    if (!db) {
-        throw new Error('Base de datos no inicializada. Llame a initDatabase() primero.');
-    }
-    return db;
+  if (!pool) {
+    throw new Error('Base de datos no inicializada. Llame a initDatabase() primero.');
+  }
+  return pool;
+}
+
+/**
+ * Ejecuta un query con manejo de errores
+ */
+async function query(text, params) {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(text, params);
+    return result;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Cierra el pool de conexiones
+ */
+async function closeDatabase() {
+  if (pool) {
+    await pool.end();
+    pool = null;
+    console.log('✅ Conexión PostgreSQL cerrada');
+  }
 }
 
 module.exports = {
-    initDatabase,
-    getDatabase
+  initDatabase,
+  getDatabase,
+  query,
+  closeDatabase
 };
