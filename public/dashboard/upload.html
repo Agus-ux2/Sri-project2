@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carga de Documentos - SRI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/base.css">
+    <style>
+        body {
+            font-family: var(--font-sans);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+            border-right: 1px solid var(--color-neutral-200);
+            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.02);
+        }
+
+
+        .nav-links {
+            flex: 1;
+            padding: var(--spacing-md);
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--color-neutral-600);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .nav-item:hover {
+            background: var(--color-neutral-50);
+            color: var(--color-neutral-900);
+        }
+
+        .nav-item.active {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: var(--spacing-xl);
+            /* Reducido de 2xl */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Centrar horizontalmente los hijos */
+        }
+
+        .header {
+            width: 100%;
+            max-width: 650px;
+            /* Reducido de 800px */
+            margin-bottom: var(--spacing-lg);
+            /* Reducido de 2xl */
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            /* Reducido de 1.75rem */
+            color: #334155;
+            margin: 0;
+        }
+
+        .header p {
+            color: #64748b;
+            margin-top: 8px;
+            font-size: 1rem;
+        }
+
+        .status-badge-mini {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--color-neutral-200);
+            font-size: 0.75rem;
+            /* Reducido de 0.8rem */
+            color: var(--color-neutral-600);
+            margin-bottom: var(--spacing-md);
+            /* Reducido de lg */
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+
+        .status-dot.connected {
+            background: #10b981;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            /* Reducido de xl */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--color-neutral-100);
+            width: 100%;
+            max-width: 650px;
+            /* Reducido de 800px */
+            margin-bottom: var(--spacing-md);
+            /* Reducido de lg */
+        }
+
+        .type-toggle {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-lg);
+            border: 1px solid #e2e8f0;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+        }
+
+        .toggle-btn.active {
+            background: white;
+            color: #00a859;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            font-weight: 700;
+        }
+
+        .upload-area {
+            width: 100%;
+            min-height: 140px;
+            /* Reducido significativamente de 220px */
+            background: #f8fafc;
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed #cbd5e1;
+            margin-bottom: var(--spacing-sm);
+            /* Reducido de lg */
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: #00a859;
+            background: #f0fdf4;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            /* Reducido de 3rem */
+            margin-bottom: 8px;
+        }
+
+        .upload-text {
+            color: #64748b;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .debug-log {
+            margin-top: var(--spacing-md);
+            background: #1e293b;
+            color: #94a3b8;
+            font-family: monospace;
+            padding: 12px;
+            font-size: 0.75rem;
+            /* Más compacto */
+            border-radius: var(--radius-md);
+            max-height: 100px;
+            /* Reducido de 200px */
+            overflow-y: auto;
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .file-block {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            background: #f8fafc;
+        }
+
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .field-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .field-label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .field-value {
+            color: #1e293b;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .btn-confirm {
+            width: 100%;
+            background: #00a859;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo-area" style="padding: var(--spacing-xl) var(--spacing-lg);">
+            <img src="/assets/images/sri-logo.png" alt="SRI Logo" class="logo-img">
+            <div class="logo-text">Soluciones <span>Rurales</span></div>
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard/dashboard.html" class="nav-item">
+                <span class="nav-icon">📊</span> Dashboard
+            </a>
+            <a href="/dashboard/upload.html" class="nav-item active">
+                <span class="nav-icon">📄</span> Carga de Documentos
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">🌾</span> Mis Granos
+            </a>
+            <a href="/dashboard/contracts.html" class="nav-item">
+                <span class="nav-icon">📋</span> Contratos
+            </a>
+            <a href="/dashboard/providers.html" class="nav-item">
+                <span class="nav-icon">🔗</span> Proveedores
+            </a>
+            <a href="#" class="nav-item" id="logoutLink">
+                <span class="nav-icon">🚪</span> Salir
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="status-badge-mini">
+                <div id="statusDot" class="status-dot"></div>
+                <span id="statusText">Verificando conexión...</span>
+            </div>
+            <h1>Carga de Documentos</h1>
+            <p>Sube tus Cartas de Porte (CPE), Análisis o Liquidaciones para procesar con OCR.</p>
+        </div>
+
+        <div class="card">
+            <div class="type-toggle">
+                <button class="toggle-btn active" onclick="setDocType('CP')" id="btn-cp">CP / CTG</button>
+                <button class="toggle-btn" onclick="setDocType('CED')" id="btn-ced">Análisis de Calidad</button>
+            </div>
+
+            <div class="upload-area" id="uploadArea">
+                <input type="file" class="file-input" multiple onchange="handleFileUpload(this)" accept=".pdf">
+                <div class="upload-icon" id="uIcon">📄</div>
+                <div class="upload-text" id="uText">Arrastrá o seleccioná hasta 10 archivos PDF</div>
+            </div>
+        </div>
+
+        <div id="resultsBox" style="display: none;">
+            <div class="card">
+                <h3 style="margin-top: 0; color: #00a859;">✨ Datos Detectados</h3>
+                <div id="loadingIndicator" style="display:none; text-align: center; padding: 20px;">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
+                    <p>Analizando con IA...</p>
+                </div>
+                <div id="fields"></div>
+                <button class="btn-confirm" id="btnConfirm" onclick="confirmData()" style="display: none;">Confirmar y
+                    Guardar</button>
+            </div>
+        </div>
+
+        <div id="debugLog" class="debug-log">
+            [SISTEMA] Iniciando sistema de carga de documentos...
+        </div>
+    </div>
+
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/session.js"></script>
+    <script>
+        if (!Session.isAuthenticated()) window.location.href = '/auth/login.html';
+
+        let currentDocType = 'CP';
+
+        function addLog(message) {
+            const log = document.getElementById('debugLog');
+            const time = new Date().toLocaleTimeString();
+            log.innerHTML += `<br>[${time}] ${message}`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function checkStatus() {
+            try {
+                const response = await API.get('/health');
+                document.getElementById('statusDot').classList.add('connected');
+                document.getElementById('statusText').innerText = 'Servidor conectado';
+                addLog("✓ Conexión con servidor establecida");
+            } catch (error) {
+                document.getElementById('statusText').innerText = 'Servidor desconectado';
+                addLog("⚠ ERROR: Servidor no disponible");
+            }
+        }
+
+        function setDocType(type) {
+            currentDocType = type;
+            document.getElementById('btn-cp').classList.toggle('active', type === 'CP');
+            document.getElementById('btn-ced').classList.toggle('active', type === 'CED');
+            addLog(`Tipo de documento cambiado a: ${type}`);
+        }
+
+        async function handleFileUpload(input) {
+            if (!input.files || input.files.length === 0) return;
+
+            const totalFiles = input.files.length;
+            addLog(`📤 Subiendo ${totalFiles} archivo(s)...`);
+
+            document.getElementById('uText').innerText = `Procesando ${totalFiles} archivo(s)...`;
+            document.getElementById('resultsBox').style.display = 'block';
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('fields').innerHTML = '';
+            document.getElementById('btnConfirm').style.display = 'none';
+
+            const formData = new FormData();
+            for (let i = 0; i < input.files.length; i++) {
+                formData.append('files', input.files[i]);
+            }
+            formData.append('docType', currentDocType);
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Authorization': `Bearer ${Session.getToken()}` }
+                });
+
+                if (!response.ok) throw new Error('Error en la carga');
+
+                const { taskId } = await response.json();
+                addLog(`✓ Tarea creada: ${taskId}`);
+                pollTaskStatus(taskId);
+            } catch (error) {
+                addLog("✖ ERROR: " + error.message);
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }
+        }
+
+        async function pollTaskStatus(taskId) {
+            try {
+                const response = await fetch(`/api/upload/status/${taskId}`, {
+                    headers: { 'Authorization': `Bearer ${Session.getToken()}` }
+                });
+                const task = await response.json();
+
+                if (task.status === 'completed') {
+                    addLog("✓ Análisis completado");
+                    showResults(task.results);
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    document.getElementById('btnConfirm').style.display = 'block';
+                    document.getElementById('uText').innerText = "✅ Proceso completado";
+                } else if (task.status === 'error') {
+                    addLog("✖ Error en el procesamiento");
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                } else {
+                    setTimeout(() => pollTaskStatus(taskId), 1500);
+                }
+            } catch (error) {
+                addLog("✖ Error al verificar estado");
+            }
+        }
+
+        function showResults(results) {
+            const container = document.getElementById('fields');
+            container.innerHTML = '';
+
+            results.forEach(res => {
+                const block = document.createElement('div');
+                block.className = 'file-block';
+                block.innerHTML = `
+                    <div class="file-header"><strong>📄 ${res.filename}</strong></div>
+                    ${res.datos.map(d => `
+                        <div class="field-row">
+                            <span class="field-label">${d.label}</span>
+                            <span class="field-value">${d.value}</span>
+                        </div>
+                    `).join('')}
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        async function confirmData() {
+            alert("✓ Datos confirmados y guardados exitosamente");
+            location.reload();
+        }
+
+        // Logout
+        document.getElementById('logoutLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('¿Cerrar sesión?')) { Session.logout(); window.location.href = '/auth/login.html'; }
+        });
+
+        checkStatus();
+    </script>
+</body>
+
+</html>

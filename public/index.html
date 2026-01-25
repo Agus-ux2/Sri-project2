@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soluciones Rurales Integradas | Blindaje Comercial</title>
+    <meta name="description"
+        content="Recuperamos capital oculto en sus liquidaciones de granos. Auditoría forense y control de gestión para productores agropecuarios.">
+    <style>
+        :root {
+            --primary: #15803d;
+            /* Verde Campo Profundo */
+            --accent: #facc15;
+            /* Amarillo Trigo/Sol */
+            --dark: #1a1c1e;
+            --light: #f3f4f6;
+            --text-dark: #374151;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #ffffff;
+            color: var(--text-dark);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Integration from Hub Page Styles */
+        header {
+            height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)),
+                url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-align: center;
+        }
+
+        .cta {
+            background: var(--primary);
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background .3s;
+        }
+
+        .cta:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .cta.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            margin-left: 10px;
+        }
+
+        .cta.secondary:hover {
+            background: #fff;
+            color: var(--dark);
+        }
+
+        /* Modern Navbar Styles */
+        nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 0;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: var(--primary);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-box {
+            display: inline-block;
+            padding: 0 40px;
+            border-right: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-box:last-child {
+            border: none;
+        }
+
+        .stat-num {
+            font-size: 38px;
+            font-weight: 800;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        /* Section Styles */
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+
+        .section-sub {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 60px auto;
+            color: #666;
+            font-size: 18px;
+        }
+
+        /* Cards con Imágenes */
+        .feature-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 100px;
+        }
+
+        .feature-img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .feature-text h3 {
+            font-size: 28px;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+
+        .feature-text p {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .check-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .check-list li {
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .check-list li::before {
+            content: "✓";
+            color: var(--primary);
+            font-weight: bold;
+            background: #dcfce7;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* Grid de Servicios */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            border: 1px solid #eee;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .card-img {
+            height: 200px;
+            background: #eee;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .card-icon {
+            font-size: 30px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        /* Trust Section */
+        .trust-section {
+            background: #f9fafb;
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #25D366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 36px;
+            }
+
+            .feature-split {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-box {
+                display: block;
+                border: none;
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-logo"><img src="/sri_logo_transparent.png" alt="SRI" style="height:40px;" /></a>
+            <div class="nav-links">
+                <a href="/auth/register.html">Registración</a>
+                <a href="#contacto">Contacto</a>
+                <a href="#">App Móvil</a>
+                <a href="/auth/login.html"
+                    style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 700; margin-left: 10px;">Acceso
+                    Clientes</a>
+            </div>
+        </div>
+    </nav>
+
+    <header>
+        <div class="container">
+            <h1>Soluciones Rurales Integradas</h1>
+            <p style="font-size: 1.5rem; margin-bottom: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Auditoría forense
+                y control de gestión para productores agropecuarios.</p>
+
+        </div>
+    </header>
+
+    <div class="stats-bar">
+        <div class="container">
+            <div class="stat-box">
+                <span class="stat-num">USD 5.40</span>
+                <span class="stat-label">Recupero Promedio por Tn</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-num">+10.000</span>
+                <span class="stat-label">Camiones Auditados</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-num">100%</span>
+                <span class="stat-label">Transparencia Total</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 1: EL PROBLEMA (Con Imagen REPARADA) -->
+    <section style="padding: 100px 0;">
+        <div class="container">
+            <div class="feature-split">
+                <!-- Imagen 2: Granos/Soja Primer Plano (High Stability URL) -->
+                <img src="https://cdn.shopify.com/s/files/1/0400/8784/6957/files/calidad-granos-alimentacion_480x480.jpg?v=1695145414"
+                    alt="Control de Calidad Granos" class="feature-img">
+                <div class="feature-text">
+                    <h2
+                        style="color: var(--primary); text-transform: uppercase; font-size: 16px; letter-spacing: 1px; font-weight: 700;">
+                        Auditoría Forense</h2>
+                    <h3>Lo que el ojo no ve, el bolsillo lo siente.</h3>
+                    <p>
+                        Entre el campo y el puerto, existen decenas de "gastos" invisibles: mermas mal aplicadas, gastos
+                        administrativos duplicados y errores de humedad. Nosotros trabajamos para reducir los
+                        sobregastos que significan una mayor eficiencia comercial.
+                    </p>
+                    <ul class="check-list">
+                        <li>Controlamos Kgs brutos vs. Kgs Netos.</li>
+                        <li>Verificamos Tarifas de Flete y Acarreo.</li>
+                        <li>Auditamos Comisiones y Gastos de Sellado.</li>
+                        <li>Realizamos el analisis y te damos las herramientas que defender tu produccion y tu bolsillo.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 2: LA SOLUCIÓN (Con Imagen PRODUCTOR TABLET) -->
+    <section style="padding: 100px 0; background: #f8fafc;">
+        <div class="container">
+            <div class="feature-split">
+                <div class="feature-text">
+                    <h2
+                        style="color: var(--primary); text-transform: uppercase; font-size: 16px; letter-spacing: 1px; font-weight: 700;">
+                        Gestión Digital</h2>
+                    <h3>Su campo, en el bolsillo. Sin complicaciones.</h3>
+                    <p>
+                        No necesita ser un experto en tecnología. Diseñamos una App pensada para su celular, tablet y
+                        ordenador.
+                        Si sabe sacar una foto, sabe usar nuestro sistema.
+                    </p>
+                    <ul class="check-list">
+                        <li><strong>Modo Offline:</strong> Funciona sin señal en el medio del lote.</li>
+                        <li><strong>Foto Remito:</strong> Escanee la carta de porte y listo.</li>
+                        <li><strong>Alertas WhatsApp:</strong> Le avisamos si un camión tuvo problemas.</li>
+                    </ul>
+                </div>
+                <!-- Imagen 3: Productor SONRIENDO con Tablet en CAMPO -->
+                <img src="https://static.vecteezy.com/system/resources/thumbnails/030/579/845/small/productive-using-tablet-digital-at-agriculture-field-generate-ai-photo.jpg"
+                    alt="Productor Contento con Tablet" class="feature-img">
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 3: FUNCIONALIDADES CON ICONOS Y FOTOS -->
+    <section style="padding: 100px 0;">
+        <div class="container">
+            <h2 class="section-title">Herramientas Reales para Problemas Reales</h2>
+            <p class="section-sub">Un ecosistema de servicios diseñado para defender su rentabilidad.</p>
+
+            <div class="grid-3">
+                <!-- Feature 1: Silo Bolsa -->
+                <div class="service-card">
+                    <img src="https://chequeado.com/wp-content/uploads/2020/07/silobolsas.jpg"
+                        alt="Silo Bolsas en Campo" class="card-img">
+                    <div class="card-body">
+                        <span class="card-icon">🥡</span>
+                        <h3 class="card-title">Gestión de Silo Bolsa</h3>
+                        <p style="color: #666; font-size: 14px;">Mantenga control del stock y georeferencia los silos en
+                            su campo.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        alt="Análisis de Datos" class="card-img">
+                    <div class="card-body">
+                        <span class="card-icon">📈</span>
+                        <h3 class="card-title">El "Precio de Mercado"</h3>
+                        <p style="color: #666; font-size: 14px;">Comparamos su precio de venta promedio contra el de la
+                            zona. Identificando instancias de mejoras.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        alt="Documentos y Firma" class="card-img">
+                    <div class="card-body">
+                        <span class="card-icon">📝</span>
+                        <h3 class="card-title">La Receta Comercial</h3>
+                        <p style="color: #666; font-size: 14px;">No venda a ciegas. Reciba instrucciones claras: "Vender
+                            30% ahora, esperar a Mayo con el resto".</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACTO -->
+    <section id="contacto" class="trust-section">
+        <div class="container">
+            <div
+                style="background: white; padding: 60px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto;">
+                <h2 style="color: var(--primary); font-size: 32px; font-weight: 800; margin-bottom: 20px;">Probarnos no
+                    cuesta nada. Literalmente.</h2>
+                <p style="font-size: 18px; color: #555; margin-bottom: 40px;">
+                    Le ofrecemos auditar sus últimas 5 liquidaciones <strong>GRATIS</strong>. Si encontramos dinero
+                    recuperable, recién ahí hablamos de trabajar juntos.
+                </p>
+                <a href="#" class="cta-btn">Agendar Prueba (15 Minutos)</a>
+                <p style="margin-top: 20px; font-size: 13px; color: #999;">Sin contratos forzosos. Sin letra chica.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: var(--dark); color: white; padding: 60px 0; text-align: center;">
+        <div class="container">
+            <h4 style="font-size: 20px; margin-bottom: 10px;">Soluciones Rurales Integradas</h4>
+            <p style="opacity: 0.6; font-size: 14px;">El aliado que defiende su cosecha.</p>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Button -->
+    <div class="whatsapp-float">💬</div>
+
+</body>
+
+</html>

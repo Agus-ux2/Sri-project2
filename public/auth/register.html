@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse - SRI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/assets/css/base.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #dee2e6 0%, #adb5bd 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg);
+        }
+
+        .register-container {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-2xl);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .register-header h1 {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--spacing-sm);
+            font-weight: 700;
+        }
+
+        .register-header p {
+            color: var(--color-neutral-600);
+            margin: 0;
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .progress-label {
+            text-align: center;
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--color-neutral-700);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .progress-bar-container {
+            background: var(--color-neutral-200);
+            height: 8px;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: var(--color-primary);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        /* Steps */
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .alert {
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-sm);
+        }
+
+        .alert-error {
+            background: hsla(0, 84%, 60%, 0.1);
+            color: var(--color-error);
+            border: 1px solid var(--color-error);
+        }
+
+        .alert-success {
+            background: hsla(142, 71%, 45%, 0.1);
+            color: var(--color-success);
+            border: 1px solid var(--color-success);
+        }
+
+        .alert-info {
+            background: hsla(207, 90%, 54%, 0.1);
+            color: #0d6efd;
+            border: 1px solid #0d6efd;
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-sm);
+        }
+
+        .alert-info input[type="checkbox"] {
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        .register-footer {
+            margin-top: var(--spacing-xl);
+            text-align: center;
+            font-size: var(--font-size-sm);
+            color: var(--color-neutral-600);
+        }
+
+        .register-footer a {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Zones Section */
+        .zones-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .zones-title {
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            color: var(--color-neutral-800);
+        }
+
+        .btn-add-zone {
+            background: transparent;
+            color: var(--color-primary);
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            transition: opacity var(--transition-fast);
+        }
+
+        .btn-add-zone:hover {
+            opacity: 0.7;
+        }
+
+        .zone-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .zone-input {
+            padding: var(--spacing-sm);
+            border: 2px solid var(--color-neutral-200);
+            border-radius: var(--radius-md);
+            font-family: var(--font-sans);
+            font-size: var(--font-size-sm);
+            transition: border-color var(--transition-fast);
+        }
+
+        .zone-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .btn-remove {
+            background: hsla(0, 84%, 60%, 0.1);
+            color: var(--color-error);
+            border: none;
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: bold;
+            transition: all var(--transition-fast);
+            width: 40px;
+        }
+
+        .btn-remove:hover {
+            background: var(--color-error);
+            color: white;
+        }
+
+        /* Password Requirements */
+        .password-requirements {
+            background: var(--color-neutral-100);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-top: var(--spacing-sm);
+            font-size: var(--font-size-sm);
+        }
+
+        .password-requirements ul {
+            margin: var(--spacing-xs) 0 0 0;
+            padding-left: var(--spacing-lg);
+        }
+
+        .password-requirements li {
+            margin-bottom: var(--spacing-xs);
+            color: var(--color-neutral-600);
+        }
+
+        .password-requirements li.valid {
+            color: var(--color-success);
+        }
+
+        .password-requirements .example {
+            margin-top: var(--spacing-sm);
+            font-style: italic;
+            color: var(--color-neutral-600);
+        }
+
+        /* Button Group */
+        .button-group {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-xl);
+        }
+
+        .btn-secondary {
+            background: var(--color-neutral-200);
+            color: var(--color-neutral-800);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-neutral-300);
+        }
+
+        @media (max-width: 768px) {
+            .zone-row {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .register-container {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="register-container">
+        <div class="register-header">
+            <div class="logo-area logo-lg logo-center" style="margin-bottom: var(--spacing-md);">
+                <img src="/assets/images/sri-logo.png" alt="SRI Logo" class="logo-img">
+                <div class="logo-text">Soluciones <span>Rurales</span></div>
+            </div>
+            <h1>Crea tu cuenta</h1>
+            <p>Registrá tu empresa para comenzar la auditoría</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-section">
+            <div class="progress-label" id="progressLabel">Paso 1 de 2 - Datos básicos</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar" style="width: 50%"></div>
+            </div>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <form id="registerForm">
+
+            <!-- PASO 1: Datos Básicos -->
+            <div class="step active" id="step1">
+                <div class="form-group">
+                    <label for="name" class="form-label">Nombre y Apellido</label>
+                    <input type="text" id="name" class="form-input" placeholder="Ej: Juan Pérez" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" class="form-input" placeholder="ejemplo@campo.com" required>
+                    <small
+                        style="color: var(--color-neutral-600); font-size: var(--font-size-xs); display: block; margin-top: var(--spacing-xs);">
+                        Usalo para verificar tu cuenta y recuperar tu contraseña.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="username" class="form-label">Nombre de Usuario <span
+                            style="color: var(--color-neutral-500); font-weight: normal;">(Opcional)</span></label>
+                    <input type="text" id="username" class="form-input" placeholder="Tu apodo o nombre corto">
+                </div>
+
+                <div class="form-group">
+                    <label for="company" class="form-label">Empresa / Razón Social</label>
+                    <input type="text" id="company" class="form-input" placeholder="Ej: Estancia La Paz S.A." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone" class="form-label">Teléfono de contacto <span
+                            style="color: var(--color-neutral-500); font-weight: normal;">(Opcional)</span></label>
+                    <input type="tel" id="phone" class="form-input" placeholder="+54 9 291 ...">
+                </div>
+
+                <div class="alert-info">
+                    <input type="checkbox" id="agreeStep1" required>
+                    <label for="agreeStep1" style="font-size: var(--font-size-sm); cursor: pointer;">
+                        En el próximo paso vas a cargar tus zonas de producción y crear tu contraseña.
+                    </label>
+                </div>
+
+                <button type="button" class="btn btn-primary btn-full btn-lg" onclick="goToStep2()">
+                    CONTINUAR
+                </button>
+
+                <div class="register-footer">
+                    ¿Ya tienes cuenta?
+                    <a href="/auth/login.html">Inicia sesión aquí</a>
+                </div>
+            </div>
+
+            <!-- PASO 2: Zonas y Seguridad -->
+            <div class="step" id="step2">
+                <!-- Zonas de Producción -->
+                <div class="zones-header">
+                    <span class="zones-title">Zonas de Producción</span>
+                    <button type="button" class="btn-add-zone" onclick="addZone()">+ Agregar Localidad</button>
+                </div>
+
+                <div id="zones-container" style="margin-bottom: var(--spacing-lg);">
+                    <div class="zone-row">
+                        <input type="text" placeholder="Ej: Bahía Blanca, PBA" class="zone-input" data-zone-loc
+                            required>
+                        <input type="number" placeholder="Has" class="zone-input" style="width: 100px;" data-zone-has>
+                        <button type="button" class="btn-remove" onclick="removeZone(this)">✕</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" id="password" class="form-input" minlength="8" required>
+
+                    <div class="password-requirements">
+                        <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Requisitos:</div>
+                        <ul id="passwordChecklist">
+                            <li id="req-length">Mínimo 8 caracteres</li>
+                            <li id="req-uppercase">Al menos 1 mayúscula</li>
+                            <li id="req-lowercase">Al menos 1 minúscula</li>
+                            <li id="req-symbol">Al menos 1 símbolo (!@#)</li>
+                        </ul>
+                        <div class="example">Ejemplo: CampoSeguro!2026</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
+                    <input type="password" id="confirmPassword" class="form-input" minlength="8" required>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary btn-lg" onclick="goToStep1()">
+                        Volver
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                        FINALIZAR REGISTRO
+                    </button>
+                </div>
+
+                <div class="register-footer">
+                    <small>Al registrarte, vas a recibir un email para confirmar tu cuenta.</small>
+                </div>
+            </div>
+
+        </form>
+
+        <div class="register-footer" style="margin-top: var(--spacing-md);">
+            <a href="/">← Volver al inicio</a>
+        </div>
+    </div>
+
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/session.js"></script>
+    <script>
+        const registerForm = document.getElementById('registerForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const alertContainer = document.getElementById('alertContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressLabel = document.getElementById('progressLabel');
+
+        let currentStep = 1;
+
+        // Si ya está autenticado, redirigir al dashboard
+        if (Session.isAuthenticated()) {
+            window.location.href = '/dashboard/dashboard.html';
+        }
+
+        // Navegación entre pasos
+        function goToStep1() {
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step1').classList.add('active');
+            progressBar.style.width = '50%';
+            progressLabel.textContent = 'Paso 1 de 2 - Datos básicos';
+            currentStep = 1;
+            window.scrollTo(0, 0);
+        }
+
+        function goToStep2() {
+            // Validar paso 1
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const company = document.getElementById('company').value.trim();
+            const agreeStep1 = document.getElementById('agreeStep1').checked;
+
+            if (!name || !email || !company) {
+                showAlert('Por favor complete todos los campos obligatorios');
+                return;
+            }
+
+            if (!agreeStep1) {
+                showAlert('Debe aceptar continuar al siguiente paso');
+                return;
+            }
+
+            // Cambiar al paso 2
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
+            progressBar.style.width = '100%';
+            progressLabel.textContent = 'Paso 2 de 2 - Zonas y seguridad';
+            currentStep = 2;
+            window.scrollTo(0, 0);
+        }
+
+        // Manejo de zonas
+        function addZone() {
+            const container = document.getElementById('zones-container');
+            const div = document.createElement('div');
+            div.className = 'zone-row';
+            div.innerHTML = `
+                <input type="text" placeholder="Ej: Pergamino, PBA" class="zone-input" data-zone-loc required>
+                <input type="number" placeholder="Has" class="zone-input" style="width: 100px;" data-zone-has>
+                <button type="button" class="btn-remove" onclick="removeZone(this)">✕</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeZone(btn) {
+            const zonesContainer = document.getElementById('zones-container');
+            if (zonesContainer.children.length > 1) {
+                btn.parentElement.remove();
+            } else {
+                showAlert('Debe tener al menos una zona de producción', 'error');
+            }
+        }
+
+        // Validación de contraseña en tiempo real
+        const passwordInput = document.getElementById('password');
+        passwordInput.addEventListener('input', function () {
+            const password = this.value;
+
+            // Validar longitud
+            const reqLength = document.getElementById('req-length');
+            if (password.length >= 8) {
+                reqLength.classList.add('valid');
+            } else {
+                reqLength.classList.remove('valid');
+            }
+
+            // Validar mayúscula
+            const reqUppercase = document.getElementById('req-uppercase');
+            if (/[A-Z]/.test(password)) {
+                reqUppercase.classList.add('valid');
+            } else {
+                reqUppercase.classList.remove('valid');
+            }
+
+            // Validar minúscula
+            const reqLowercase = document.getElementById('req-lowercase');
+            if (/[a-z]/.test(password)) {
+                reqLowercase.classList.add('valid');
+            } else {
+                reqLowercase.classList.remove('valid');
+            }
+
+            // Validar símbolo
+            const reqSymbol = document.getElementById('req-symbol');
+            if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                reqSymbol.classList.add('valid');
+            } else {
+                reqSymbol.classList.remove('valid');
+            }
+        });
+
+        // Función para mostrar alertas
+        function showAlert(message, type = 'error') {
+            alertContainer.innerHTML = `
+        <div class="alert alert-${type}">
+          ${message}
+        </div>
+      `;
+
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Manejar envío del formulario
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (currentStep !== 2) {
+                return;
+            }
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const company = document.getElementById('company').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Recopilar zonas
+            const zoneRows = document.querySelectorAll('.zone-row');
+            const zones = Array.from(zoneRows).map(row => {
+                const locInput = row.querySelector('[data-zone-loc]');
+                const hasInput = row.querySelector('[data-zone-has]');
+                return {
+                    location: locInput.value.trim(),
+                    hectares: hasInput.value ? parseInt(hasInput.value) : 0
+                };
+            }).filter(zone => zone.location);
+
+            // Validaciones
+            if (zones.length === 0) {
+                showAlert('Debe agregar al menos una zona de producción');
+                return;
+            }
+
+            if (password.length < 8) {
+                showAlert('La contraseña debe tener al menos 8 caracteres');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showAlert('Las contraseñas no coinciden');
+                return;
+            }
+
+            // Validar requisitos de contraseña
+            if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                showAlert('La contraseña no cumple con todos los requisitos');
+                return;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Procesando...';
+
+                const response = await API.post('/auth/register', {
+                    name,
+                    email,
+                    username: username || undefined,
+                    company,
+                    phone: phone || undefined,
+                    zones,
+                    password
+                }, { auth: false });
+
+                showAlert('¡Registro exitoso! Redirigiendo...', 'success');
+
+                // Si el backend devuelve token, iniciar sesión automáticamente
+                if (response.token && response.user) {
+                    Session.login(response.token, response.user);
+                    setTimeout(() => {
+                        window.location.href = '/dashboard/dashboard.html';
+                    }, 1000);
+                } else {
+                    setTimeout(() => {
+                        window.location.href = '/auth/login.html';
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('Error registro:', error);
+                showAlert(error.message || 'Error al registrarse. Intente nuevamente.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'FINALIZAR REGISTRO';
+            }
+        });
+    </script>
+</body>
+
+</html>

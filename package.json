@@ -1,0 +1,44 @@
+{
+  "name": "soluciones-rurales-integradas",
+  "version": "1.0.0",
+  "description": "Plataforma de auditoría forense y control de gestión para productores agropecuarios",
+  "main": "backend/server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js"
+  },
+  "keywords": [
+    "agro",
+    "auditoría",
+    "OCR",
+    "granos",
+    "calidad"
+  ],
+  "author": "Soluciones Rurales Integradas",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.3",
+    "bcryptjs": "^2.4.3",
+    "connect-redis": "^7.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-session": "^1.19.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^4.2.1",
+    "node-fetch": "^2.7.0",
+    "nodemailer": "^6.9.7",
+    "pdf-parse": "^1.1.1",
+    "playwright": "^1.58.0",
+    "redis": "^4.7.1",
+    "sqlite3": "^5.1.6",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

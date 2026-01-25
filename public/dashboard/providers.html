@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proveedores - SRI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/base.css">
+    <style>
+        body {
+            font-family: var(--font-sans);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        /* Reutilizamos el Sidebar del Dashboard */
+        .sidebar {
+            width: 280px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+            border-right: 1px solid var(--color-neutral-200);
+            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.02);
+        }
+
+
+        .nav-links {
+            flex: 1;
+            padding: var(--spacing-md);
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--color-neutral-600);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .nav-item:hover {
+            background: var(--color-neutral-50);
+            color: var(--color-neutral-900);
+        }
+
+        .nav-item.active {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: var(--spacing-2xl);
+        }
+
+        .header {
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.75rem;
+            color: #334155;
+        }
+
+        .header p {
+            color: #64748b;
+            margin-top: 8px;
+            font-size: 1rem;
+        }
+
+        /* Proveedores Grid */
+        .providers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: var(--spacing-xl);
+        }
+
+        .provider-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--color-neutral-100);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .provider-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .provider-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: var(--spacing-md);
+            filter: grayscale(1);
+            opacity: 0.7;
+        }
+
+        .provider-card.connected .provider-logo {
+            filter: none;
+            opacity: 1;
+        }
+
+        .provider-name {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #1e293b;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: var(--spacing-lg);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-connected {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-disconnected {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn-connect {
+            width: 100%;
+            background: #00a859;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-connect:hover {
+            background: #008f4c;
+        }
+
+        .btn-open {
+            width: 100%;
+            background: white;
+            color: #00a859;
+            border: 2px solid #00a859;
+            padding: 8px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+
+        .btn-disconnect {
+            width: 100%;
+            background: #f1f5f9;
+            color: #64748b;
+            border: none;
+            padding: 8px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo-area" style="padding: var(--spacing-xl) var(--spacing-lg);">
+            <img src="/assets/images/sri-logo.png" alt="SRI Logo" class="logo-img">
+            <div class="logo-text">Soluciones <span>Rurales</span></div>
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard/dashboard.html" class="nav-item">
+                <span class="nav-icon">📊</span> Dashboard
+            </a>
+            <a href="/dashboard/upload.html" class="nav-item">
+                <span class="nav-icon">📄</span> Carga de Documentos
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">🌾</span> Mis Granos
+            </a>
+            <a href="/dashboard/contracts.html" class="nav-item">
+                <span class="nav-icon">📋</span> Contratos
+            </a>
+            <a href="/dashboard/providers.html" class="nav-item active">
+                <span class="nav-icon">📊</span> Proveedores
+            </a>
+            <a href="#" class="nav-item" id="logoutLink">
+                <span class="nav-icon">🚪</span> Salir
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1><span class="nav-icon">🔗</span> Conexión con Proveedores</h1>
+            <p>Conectá tus cuentas para descargar análisis, comprobantes y contratos automáticamente.</p>
+        </div>
+
+        <div class="providers-grid" id="providers-list">
+            <!-- Cargado dinámicamente por JavaScript -->
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--color-neutral-500);">
+                <div class="loading-icon" style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
+                Cargando proveedores...
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/js/api.js?v=1.1"></script>
+    <script src="/assets/js/session.js?v=1.1"></script>
+    <script>
+        const PROVIDERS = {
+            cargill: { name: "Cargill", logo: "/images/logos/cargill.svg?v=3", color: "#419641", initials: "CA" },
+            ldc: { name: "LDC", logo: "/images/logos/ldc.svg?v=4", color: "#004D71", initials: "LD" },
+            bunge: { name: "Bunge", logo: "/images/logos/bunge.svg?v=4", color: "#002D6E", initials: "BU" },
+            cofco: {
+                name: "COFCO",
+                logo: "/images/logos/cofco.svg?v=1",
+                color: "#004D71",
+                initials: "CO",
+                filter: "brightness(0) saturate(100%) invert(31%) sepia(91%) saturate(1450%) hue-rotate(189deg) brightness(88%) contrast(92%)"
+            },
+            fyo: {
+                name: "FyO",
+                logo: "/images/logos/fyo.png?v=1",
+                color: "#002D6E",
+                initials: "FyO",
+                filter: "brightness(0) saturate(100%) invert(11%) sepia(35%) saturate(7400%) hue-rotate(205deg) brightness(90%) contrast(100%)"
+            },
+            aca: {
+                name: "ACA",
+                logo: "/images/logos/aca.png?v=4",
+                color: "#004B87",
+                initials: "ACA",
+                filter: "brightness(0) saturate(100%) invert(31%) sepia(91%) saturate(1450%) hue-rotate(189deg) brightness(88%) contrast(92%)"
+            }
+        };
+
+        // Global Logo Error Handler (Robust)
+        window.onLogoError = function (img, color, initials) {
+            const parent = img.parentNode;
+            if (parent) {
+                parent.innerHTML = `
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background-color: ${color}; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 15px;">
+                        ${initials}
+                    </div>
+                 `;
+            }
+        };
+
+        // Función auxiliar para obtener headers de API
+        window.getAuthHeaders = () => API.getHeaders(true);
+
+        async function loadProviders() {
+            try {
+                // Sincronizar con el backend SRI
+                const res = await fetch("/api/providers/list", { headers: window.getAuthHeaders() });
+                let connected = [];
+                if (res.ok) {
+                    const data = await res.json();
+                    connected = (data.providers || []).map(p => p.provider);
+                }
+
+                const container = document.getElementById("providers-list");
+                if (!container) return;
+                container.innerHTML = "";
+
+                for (const key in PROVIDERS) {
+                    const p = PROVIDERS[key];
+                    const isConnected = connected.includes(key);
+
+                    const clickAction = isConnected ? `openConnectedProvider('${key}')` : `startProviderLogin('${key}', event)`;
+
+                    const card = document.createElement('div');
+                    card.className = `provider-card ${isConnected ? 'connected' : ''}`;
+                    card.innerHTML = `
+                        <div style="height: 80px; display: flex; align-items: center; justify-content: center; width: 100%; cursor: pointer; transition: transform 0.2s;" 
+                             onclick="${clickAction}"
+                             onmouseover="this.style.transform='scale(1.05)'" 
+                             onmouseout="this.style.transform='scale(1)'"
+                             title="${isConnected ? 'Abrir Portal' : 'Conectar'}">
+                            <img src="${p.logo}" alt="${p.name}" class="provider-logo" 
+                                 style="${p.filter ? `filter: ${p.filter};` : ''}"
+                                 onerror="window.onLogoError(this, '${p.color}', '${p.initials}')">
+                        </div>
+                        <h3 class="provider-name">${p.name}</h3>
+                        
+                        <div class="status-badge ${isConnected ? 'status-connected' : 'status-disconnected'}">
+                            ${isConnected ? '✓ Conectado' : '✕ Desconectado'}
+                        </div>
+
+                        ${isConnected ?
+                            `<button class="btn-open" onclick="window.openConnectedProvider('${key}')">Abrir Portal</button>
+                         <button class="btn-disconnect" onclick="window.disconnectProvider('${key}')">Desconectar</button>`
+                            :
+                            `<button class="btn-connect" onclick="startProviderLogin('${key}', event)">Conectar</button>`
+                        }
+                    `;
+                    container.appendChild(card);
+                }
+            } catch (e) {
+                console.error("Provider Error", e);
+            }
+        }
+
+        // Define global functions for buttons
+        window.startProviderLogin = async function (provider, event) {
+            const btn = event?.currentTarget || event?.target;
+            const originalText = btn ? btn.innerText : 'Conectar';
+
+            if (btn) {
+                btn.innerText = "⏳ Iniciando...";
+                btn.disabled = true;
+                btn.style.opacity = "0.7";
+            }
+
+            try {
+                const res = await fetch('/api/providers/connect', {
+                    method: 'POST',
+                    headers: window.getAuthHeaders(),
+                    body: JSON.stringify({ provider })
+                });
+
+                if (res.ok) {
+                    alert(`🚀 VENTANA DE PROVEEDOR ABIERTA\n\nSe ha abierto una ventana de navegador para ${provider.toUpperCase()}.\n\nPor favor, ingresá tus credenciales en esa ventana para autorizar la conexión.`);
+
+                    if (btn) {
+                        btn.innerText = "Confirmar Conexión";
+                        btn.disabled = false;
+
+                        btn.onclick = async (e) => {
+                            e.stopPropagation();
+                            if (confirm("¿Ya te logueaste exitosamente en la ventana emergente?")) {
+                                try {
+                                    await fetch('/api/providers/force-connect', {
+                                        method: 'POST',
+                                        headers: window.getAuthHeaders(),
+                                        body: JSON.stringify({ provider })
+                                    });
+                                    alert(`✅ Conexión confirmada con ${provider.toUpperCase()}`);
+                                    clearInterval(pollInterval);
+                                    loadProviders();
+                                } catch (err) {
+                                    alert("Error al confirmar conexión");
+                                }
+                            }
+                        };
+                    }
+
+                    let attempts = 0;
+                    const maxAttempts = 60;
+
+                    const pollInterval = setInterval(async () => {
+                        attempts++;
+                        try {
+                            const statusRes = await fetch("/api/providers/list", { headers: window.getAuthHeaders() });
+                            if (statusRes.ok) {
+                                const data = await statusRes.json();
+                                const isConnected = (data.providers || []).some(p => p.provider === provider);
+
+                                if (isConnected) {
+                                    clearInterval(pollInterval);
+                                    loadProviders();
+                                }
+                            }
+                        } catch (err) { console.error("Polling error", err); }
+
+                        if (attempts >= maxAttempts) {
+                            clearInterval(pollInterval);
+                            if (btn && btn.innerText === "Confirmar Conexión") {
+                                btn.innerText = originalText;
+                                loadProviders();
+                            }
+                        }
+                    }, 2000);
+
+                } else {
+                    throw new Error('Server returned error');
+                }
+            } catch (e) {
+                console.error("Login Error", e);
+                alert("❌ No se pudo abrir la ventana del proveedor. Verifica que el servidor esté corriendo.");
+                if (btn) {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                }
+            }
+        };
+
+        window.openConnectedProvider = async function (provider) {
+            try {
+                const res = await fetch('/api/providers/connect', {
+                    method: 'POST',
+                    headers: window.getAuthHeaders(),
+                    body: JSON.stringify({ provider })
+                });
+
+                if (!res.ok) alert("Error al intentar abrir el portal.");
+            } catch (e) {
+                console.error(e);
+                alert("Error de conexión con el servidor.");
+            }
+        };
+
+        window.disconnectProvider = async function (p) {
+            if (!confirm("¿Desconectar esta cuenta?")) return;
+            await fetch("/api/providers/delete/" + p, { method: "DELETE", headers: window.getAuthHeaders() });
+            loadProviders();
+        };
+
+        // Inicialización
+        if (!Session.isAuthenticated()) window.location.href = '/auth/login.html';
+        document.getElementById('logoutLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('¿Cerrar sesión?')) { Session.logout(); window.location.href = '/auth/login.html'; }
+        });
+
+        loadProviders();
+    </script>
+</body>
+
+</html>

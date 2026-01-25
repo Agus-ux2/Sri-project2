@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo Soluciones Rurales – Hub de Acceso</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#15803d">
+    <link rel="apple-touch-icon" href="sri_pwa_icon.png">
+    <meta name="description"
+        content="Demo de la plataforma Soluciones Rurales Integradas. Navegación completa sin referencias a contratos." />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --primary: #15803d;
+            /* verde campo profundo */
+            --accent: #facc15;
+            /* amarillo trigo */
+            --dark: #1a1c1e;
+            --light: #f3f4f6;
+            --text-dark: #374151;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--light);
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)),
+                url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .cta {
+            background: var(--primary);
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background .3s;
+        }
+
+        .cta:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .cta.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            margin-left: 10px;
+        }
+
+        .cta.secondary:hover {
+            background: #fff;
+            color: var(--dark);
+        }
+
+        /* Modern Navbar Styles */
+        nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 0;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Adjust header to not hide behind nav if needed, though absolute overlay is desired here */
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-logo"><img src="/sri_logo_transparent.png" alt="SRI" style="height:40px;" /></a>
+            <div class="nav-links">
+                <a href="/auth/register.html">Registración</a>
+                <a href="/index.html#contacto">Contacto</a>
+                <a href="#">App Móvil</a>
+                <a href="/dashboard/dashboard.html">Desktop Productor</a>
+                <a href="/auth/login.html"
+                    style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 700; margin-left: 10px;">Ingresar</a>
+            </div>
+        </div>
+    </nav>
+    <header>
+        <div class="container">
+            <h1>Soluciones Rurales Integradas</h1>
+            <p>Auditoría forense y control de gestión para productores agropecuarios.</p>
+            <a class="cta" href="/index.html">Explorar Landing Page</a>
+            <a class="cta secondary" href="/auth/login.html">Ingresar a Demo</a>
+        </div>
+    </header>
+    <section class="container" style="padding:4rem 0; text-align:center;">
+        <h2>¿Qué ofrecemos?</h2>
+        <p>Una suite completa de herramientas para maximizar la rentabilidad de tu producción.</p>
+        <ul style="list-style:none; padding:0; display:flex; justify-content:center; gap:2rem;">
+            <li>🧾 Auditoría de liquidaciones</li>
+            <li>📈 Análisis de precios de mercado</li>
+            <li>🚚 Gestión de logística</li>
+        </ul>
+    </section>
+    <footer>
+        <p>© 2025 Soluciones Rurales Integradas – Todos los derechos reservados.</p>
+    </footer>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registrado', reg))
+                .catch(err => console.log('Error registro SW', err));
+        }
+    </script>
+</body>
+
+</html>
