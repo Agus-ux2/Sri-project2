@@ -12,6 +12,8 @@ const path = require('path');
 class StorageService {
     constructor() {
         // Configurar Cloudinary
+        const cloudUrl = process.env.CLOUDINARY_URL;
+
         if (env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET) {
             cloudinary.config({
                 cloud_name: env.CLOUDINARY_CLOUD_NAME,
@@ -19,8 +21,28 @@ class StorageService {
                 api_secret: env.CLOUDINARY_API_SECRET
             });
             this.isConfigured = true;
-            console.log('✅ Cloudinary configurado correctamente');
-        } else {
+            console.log('✅ Cloudinary configurado correctamente (Variables)');
+        } else if (cloudUrl) {
+            // Fallback: Parse from CLOUDINARY_URL if set
+            // Format: cloudinary://<api_key>:<api_secret>@<cloud_name>
+            try {
+                const regex = /cloudinary:\/\/(\d+):([a-zA-Z0-9_-]+)@([a-zA-Z0-9_-]+)/;
+                const match = cloudUrl.match(regex);
+                if (match) {
+                    cloudinary.config({
+                        cloud_name: match[3],
+                        api_key: match[1],
+                        api_secret: match[2]
+                    });
+                    this.isConfigured = true;
+                    console.log('✅ Cloudinary configurado correctamente (URL)');
+                }
+            } catch (e) {
+                console.error("Error parsing CLOUDINARY_URL", e);
+            }
+        }
+
+        if (!this.isConfigured) {
             console.warn('⚠️ Cloudinary no configurado. Usando almacenamiento local efímero.');
             this.isConfigured = false;
         }
