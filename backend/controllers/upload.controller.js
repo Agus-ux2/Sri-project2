@@ -71,6 +71,9 @@ class UploadController {
             // Lazy load services to ensure connection
             const StorageService = require('../services/storage.service');
             const DocumentModel = require('../models/document.model');
+            const OCRService = require('../services/ocr.service'); // Ensure OCRService is loaded
+            const ParserService = require('../services/parser.service');
+            const ContractModel = require('../models/contract.model'); // Importar modelo
 
             for (const file of files) {
                 try {
@@ -89,19 +92,52 @@ class UploadController {
                         file_size: file.size
                     });
 
-                    // 3. Procesar OCR
-                    const result = await OCRService.processPDF(uploadResult.url, docType);
+                    // 3. Procesar Contenido (OCR o Parser)
+                    let result;
+                    if (file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/')) {
+                        // Usar OCR (Nanonets o Local)
+                        result = await OCRService.processPDF(uploadResult.url, docType);
+                    } else {
+                        // Usar Parser (Excel/Txt)
+                        result = await ParserService.processFile(file.path, file.mimetype);
+                    }
 
                     result.filename = file.originalname;
                     results.push(result);
 
-                    // 4. Guardar resultados OCR en BD
+                    // 4. Guardar resultados Extraction en BD
                     await DocumentModel.updateOCRStatus(document.id, 'completed', result);
+
+                    // 5. AUTO-CREAR CONTRATO (Si hay suficientes datos)
+                    if (result.datos && result.datos.length > 0) {
+                        const product = result.datos.find(d => d.label === 'Producto' || d.label.includes('Prod'))?.value;
+                        const kilos = result.datos.find(d => d.label === 'Peso Neto' || d.label === 'Kilos' || d.label.includes('Peso'))?.value;
+                        const cpe = result.datos.find(d => d.label === 'CPE/CTG' || d.label.includes('CPE') || d.label.includes('Ref'))?.value;
+
+                        // Solo crear si tenemos al menos Producto y Kilos
+                        if (product && kilos) {
+                            try {
+                                await ContractModel.create({
+                                    user_id: userId,
+                                    contract_number: cpe || 'S/N',
+                                    provider: 'Proveedor S/D',
+                                    grain_type: product,
+                                    quantity: parseFloat(kilos.replace(',', '.').replace(/[^\d.]/g, '')),
+                                    price: 0,
+                                    delivery_date: new Date(),
+                                    status: 'draft'
+                                });
+                                console.log('✅ Contrato Borrador creado automáticamente');
+                            } catch (err) {
+                                console.error('Error creando contrato automático:', err);
+                            }
+                        }
+                    }
 
                     task.processedFiles++;
                     console.log(`✓ Procesado y Guardado: ${file.originalname}`);
 
-                    // 5. Limpiar archivo local temporal
+                    // 6. Limpiar archivo local temporal
                     const fs = require('fs');
                     try {
                         if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
@@ -120,7 +156,7 @@ class UploadController {
                 }
             }
 
-            // Actualizar tarea
+            // Actualizar tarea de UI
             task.status = 'completed';
             task.results = results;
             tasks.set(taskId, task);
