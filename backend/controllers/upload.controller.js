@@ -63,24 +63,49 @@ class UploadController {
     /**
      * Procesar archivos de forma asíncrona
      */
-    static async processFiles(taskId, files, docType) {
+    static async processFiles(taskId, files, docType, userId) {
         try {
             const task = tasks.get(taskId);
             const results = [];
+
+            // Lazy load services to ensure connection
+            const StorageService = require('../services/storage.service');
+            const DocumentModel = require('../models/document.model');
 
             for (const file of files) {
                 try {
                     console.log(`🔄 Procesando: ${file.originalname}`);
 
-                    const result = await OCRService.processPDF(file.path, docType);
-                    result.filename = file.originalname; // Usar nombre original
+                    // 1. Subir a Cloudinary (Persistencia)
+                    const uploadResult = await StorageService.uploadFile(file.path);
+
+                    // 2. Crear registro en BD
+                    const document = await DocumentModel.create({
+                        user_id: userId,
+                        filename: file.filename,
+                        original_name: file.originalname,
+                        file_path: uploadResult.url,
+                        file_type: file.mimetype,
+                        file_size: file.size
+                    });
+
+                    // 3. Procesar OCR
+                    const result = await OCRService.processPDF(uploadResult.url, docType);
+
+                    result.filename = file.originalname;
                     results.push(result);
 
-                    task.processedFiles++;
-                    console.log(`✓ Procesado: ${file.originalname}`);
+                    // 4. Guardar resultados OCR en BD
+                    await DocumentModel.updateOCRStatus(document.id, 'completed', result);
 
-                    // Limpiar archivo después de procesar
-                    fs.unlinkSync(file.path);
+                    task.processedFiles++;
+                    console.log(`✓ Procesado y Guardado: ${file.originalname}`);
+
+                    // 5. Limpiar archivo local temporal
+                    const fs = require('fs');
+                    try {
+                        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+                    } catch (e) { }
 
                 } catch (error) {
                     console.error(`✗ Error procesando ${file.originalname}:`, error);
