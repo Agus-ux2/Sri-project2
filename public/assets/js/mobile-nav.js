@@ -288,8 +288,25 @@ class MobileNavigation {
         indicator.textContent = '📡 Sin conexión - Modo offline';
         document.body.appendChild(indicator);
 
-        const updateStatus = () => {
-            if (!navigator.onLine && isMobile()) {
+        const updateStatus = async () => {
+            const isBrowserOffline = !navigator.onLine;
+            let isServerUnreachable = false;
+
+            // Si el browser dice que tiene internet, verificamos con un ping real al API
+            if (!isBrowserOffline) {
+                try {
+                    // Ping rápido con timeout corto (2s)
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2000);
+                    const res = await fetch('/api/health', { method: 'HEAD', signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (!res.ok) isServerUnreachable = true;
+                } catch (e) {
+                    isServerUnreachable = true;
+                }
+            }
+
+            if ((isBrowserOffline || isServerUnreachable) && isMobile()) {
                 indicator.classList.add('show');
             } else {
                 indicator.classList.remove('show');
@@ -300,8 +317,11 @@ class MobileNavigation {
         window.addEventListener('online', updateStatus);
         window.addEventListener('offline', updateStatus);
 
-        // Also update on resize in case they switch to mobile view simulation
+        // Also update on resize
         window.addEventListener('resize', updateStatus);
+
+        // Verificar periódicamente cada 10s
+        setInterval(updateStatus, 10000);
 
         // Check initial state
         updateStatus();
