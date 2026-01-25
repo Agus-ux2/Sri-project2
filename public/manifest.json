@@ -1,21 +1,76 @@
 {
     "name": "Soluciones Rurales Integradas",
     "short_name": "SRI Agro",
-    "description": "Plataforma Inteligente para el Productor Agropecuario",
-    "start_url": "/index.html",
+    "description": "Plataforma de auditoría forense y control de gestión para productores agropecuarios",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
-    "background_color": "#0a0a0a",
-    "theme_color": "#2ecc71",
+    "orientation": "portrait-primary",
+    "background_color": "#ffffff",
+    "theme_color": "#78b13f",
+    "categories": [
+        "business",
+        "finance",
+        "productivity"
+    ],
     "icons": [
         {
-            "src": "sri_pwa_icon.png",
+            "src": "/sri_pwa_icon.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
-            "src": "sri_pwa_icon.png",
+            "src": "/sri_pwa_icon.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/sri_pwa_icon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/sri_pwa_icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/sri_pwa_icon.png",
+            "sizes": "540x720",
+            "type": "image/png",
+            "form_factor": "narrow"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Dashboard",
+            "short_name": "Dashboard",
+            "description": "Ver actividad reciente",
+            "url": "/dashboard/dashboard.html",
+            "icons": [
+                {
+                    "src": "/sri_pwa_icon.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Cargar Documento",
+            "short_name": "Upload",
+            "description": "Subir carta de porte",
+            "url": "/dashboard/upload.html",
+            "icons": [
+                {
+                    "src": "/sri_pwa_icon.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }
