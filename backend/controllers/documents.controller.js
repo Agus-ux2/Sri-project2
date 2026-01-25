@@ -18,14 +18,31 @@ class DocumentsController {
                 });
             }
 
+            const StorageService = require('../services/storage.service');
+
+            // Subir a Cloudinary (o Local fallback)
+            console.log('📤 Procesando archivo:', req.file.filename);
+            const uploadResult = await StorageService.uploadFile(req.file.path);
+
             const document = await DocumentModel.create({
                 user_id: req.user.id,
                 filename: req.file.filename,
                 original_name: req.file.originalname,
-                file_path: req.file.path,
+                file_path: uploadResult.url, // Guardamos la URL remota
                 file_type: req.file.mimetype,
                 file_size: req.file.size
             });
+
+            // Opcional: Eliminar archivo temporal local después de subir
+            if (uploadResult.storage_type === 'cloudinary') {
+                const fs = require('fs');
+                try {
+                    fs.unlinkSync(req.file.path);
+                    console.log('🗑️ Archivo temporal local eliminado');
+                } catch (e) {
+                    // Ignorar error de borrado
+                }
+            }
 
             res.status(201).json({
                 message: 'Documento subido exitosamente',
@@ -34,6 +51,7 @@ class DocumentsController {
                     filename: document.filename,
                     original_name: document.original_name,
                     file_type: document.file_type,
+                    file_path: document.file_path, // Devolver URL para frontend
                     ocr_status: 'pending'
                 }
             });

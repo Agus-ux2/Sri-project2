@@ -30,6 +30,11 @@ module.exports = {
     NANONETS_API_KEY: process.env.NANONETS_API_KEY || '',
     NANONETS_MODEL_ID: process.env.NANONETS_MODEL_ID || '',
 
+    // Cloudinary Storage
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
+    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '',
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',
+
     // URLs
     FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
     BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:3000/api',
