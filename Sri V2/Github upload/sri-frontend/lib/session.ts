@@ -35,6 +35,28 @@ class Session {
         }
         return false;
     }
+
+    static async exchangeOTT(ott: string): Promise<boolean> {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3010/api';
+            const res = await fetch(`${API_URL}/auth/exchange`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ott })
+            });
+
+            if (!res.ok) return false;
+
+            const data = await res.json();
+            if (data.token && data.user) {
+                Session.login(data.token, data.user);
+                return true;
+            }
+            return false;
+        } catch {
+            return false;
+        }
+    }
 }
 
 export default Session;

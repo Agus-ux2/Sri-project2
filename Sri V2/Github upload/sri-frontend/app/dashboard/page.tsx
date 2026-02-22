@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     FileText,
     Upload,
@@ -18,6 +18,7 @@ import Session from '@/lib/session';
 
 export default function DashboardPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [user, setUser] = useState<any>(null);
     const [documents, setDocuments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -28,15 +29,30 @@ export default function DashboardPage() {
     });
 
     useEffect(() => {
-        if (!Session.isAuthenticated()) {
-            router.push('/login');
-            return;
-        }
+        async function init() {
+            // Check for one-time token (cross-domain login)
+            const ott = searchParams.get('ott');
+            if (ott) {
+                const success = await Session.exchangeOTT(ott);
+                // Clean the URL (remove ?ott=)
+                window.history.replaceState({}, '', '/dashboard');
+                if (!success) {
+                    router.push('/login');
+                    return;
+                }
+            }
 
-        const userData = Session.getUser();
-        setUser(userData);
-        fetchDocuments();
-    }, [router]);
+            if (!Session.isAuthenticated()) {
+                router.push('/login');
+                return;
+            }
+
+            const userData = Session.getUser();
+            setUser(userData);
+            fetchDocuments();
+        }
+        init();
+    }, [router, searchParams]);
 
     const fetchDocuments = async () => {
         try {

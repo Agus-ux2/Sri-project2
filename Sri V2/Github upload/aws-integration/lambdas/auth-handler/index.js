@@ -1,9 +1,11 @@
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'sri-secret-key-2026';
 const JWT_EXPIRES_IN = '24h';
+const OTT_EXPIRY_SECONDS = 60;
 
 const pool = new Pool({
     host: process.env.DB_HOST || 'sri2026db.clcsiaesie50.us-east-2.rds.amazonaws.com',
@@ -135,10 +137,22 @@ async function handleLogin(body) {
             { expiresIn: JWT_EXPIRES_IN }
         );
 
+        // Generate one-time token for cross-domain redirect
+        const ottId = crypto.randomUUID();
+        const expiresAt = new Date(Date.now() + OTT_EXPIRY_SECONDS * 1000);
+        await pool.query(
+            'INSERT INTO ott_tokens (id, user_id, expires_at) VALUES ($1, $2, $3)',
+            [ottId, user.id, expiresAt]
+        );
+
+        // Lazy cleanup: delete expired OTTs
+        await pool.query('DELETE FROM ott_tokens WHERE expires_at < NOW()').catch(() => { });
+
         return response(200, {
             success: true,
             message: 'Login successful',
             token,
+            ott: ottId,
             user: {
                 id: user.id,
                 email: user.email,
@@ -152,6 +166,63 @@ async function handleLogin(body) {
     } catch (error) {
         console.error('Login error:', error);
         return response(500, { error: 'Login failed', details: error.message });
+    }
+}
+
+// Exchange one-time token for JWT (cross-domain flow)
+async function handleExchange(body) {
+    const { ott } = body;
+    if (!ott) {
+        return response(400, { error: 'Missing ott parameter' });
+    }
+
+    const client = await pool.connect();
+    try {
+        // Find and consume the OTT in one atomic operation
+        const result = await client.query(
+            `DELETE FROM ott_tokens 
+             WHERE id = $1 AND used = FALSE AND expires_at > NOW() 
+             RETURNING user_id`,
+            [ott]
+        );
+
+        if (result.rows.length === 0) {
+            return response(401, { error: 'Invalid or expired one-time token' });
+        }
+
+        const userId = result.rows[0].user_id;
+
+        // Fetch user data
+        const userResult = await client.query(
+            'SELECT id, email, name, username, company, role FROM users WHERE id = $1',
+            [userId]
+        );
+
+        if (userResult.rows.length === 0) {
+            return response(404, { error: 'User not found' });
+        }
+
+        const user = userResult.rows[0];
+
+        // Generate JWT
+        const token = jwt.sign(
+            { userId: user.id, email: user.email, role: user.role },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRES_IN }
+        );
+
+        return response(200, {
+            success: true,
+            message: 'Token exchanged successfully',
+            token,
+            user
+        });
+
+    } catch (error) {
+        console.error('Exchange error:', error);
+        return response(500, { error: 'Token exchange failed', details: error.message });
+    } finally {
+        client.release();
     }
 }
 
@@ -228,6 +299,10 @@ exports.handler = async (event) => {
 
         if (path.endsWith('/me') && method === 'GET') {
             return await handleGetMe(event);
+        }
+
+        if (path.endsWith('/exchange') && method === 'POST') {
+            return await handleExchange(body);
         }
 
         return response(404, { error: 'Not found', path, method });

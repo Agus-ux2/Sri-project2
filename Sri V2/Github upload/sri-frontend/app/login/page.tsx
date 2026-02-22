@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import API from '@/lib/api';
 import Session from '@/lib/session';
@@ -9,6 +9,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +40,15 @@ export default function LoginPage() {
 
             if (response.token && response.user) {
                 Session.login(response.token, response.user);
-                router.push('/dashboard');
+
+                // Cross-domain redirect: if ?redirect= param exists, use OTT
+                const redirectUrl = searchParams.get('redirect');
+                if (redirectUrl && response.ott) {
+                    const separator = redirectUrl.includes('?') ? '&' : '?';
+                    window.location.href = `${redirectUrl}${separator}ott=${response.ott}`;
+                } else {
+                    router.push('/dashboard');
+                }
             } else {
                 setError('Respuesta inválida del servidor');
             }
