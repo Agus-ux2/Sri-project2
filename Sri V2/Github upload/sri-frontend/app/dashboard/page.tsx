@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     FileText,
@@ -16,7 +16,7 @@ import {
 import API from '@/lib/api';
 import Session from '@/lib/session';
 
-export default function DashboardPage() {
+function DashboardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [user, setUser] = useState<any>(null);
@@ -256,5 +256,13 @@ export default function DashboardPage() {
                 </div>
             </div>
         </section>
+    );
+}
+
+export default function DashboardPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50 text-green-700 font-bold">Cargando SRI...</div>}>
+            <DashboardContent />
+        </Suspense>
     );
 }
