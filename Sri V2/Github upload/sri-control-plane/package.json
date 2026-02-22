@@ -1,0 +1,36 @@
+{
+    "name": "sri-control-plane",
+    "version": "1.0.0",
+    "description": "SRI Control Plane API",
+    "main": "dist/index.js",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "migrate": "node dist/db/migrate.js"
+    },
+    "dependencies": {
+        "@aws-sdk/client-s3": "^3.490.0",
+        "@aws-sdk/s3-request-presigner": "^3.975.0",
+        "@fastify/cors": "^8.0.0",
+        "@fastify/jwt": "^8.0.0",
+        "@fastify/multipart": "^8.3.1",
+        "@prisma/client": "^5.22.0",
+        "@types/bcrypt": "^6.0.0",
+        "axios": "^1.13.3",
+        "bcrypt": "^6.0.0",
+        "dotenv": "^16.4.1",
+        "fastify": "^4.26.0",
+        "fastify-plugin": "^4.5.1",
+        "form-data": "^4.0.5",
+        "ioredis": "^5.3.2",
+        "pg": "^8.11.3",
+        "prisma": "^5.22.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.5",
+        "@types/pg": "^8.11.0",
+        "tsx": "^4.7.0",
+        "typescript": "^5.3.3"
+    }
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Shield Shape -->
+  <path d="M50 95C50 95 85 80 85 30V15H15V30C15 80 50 95 50 95Z" fill="#27ae60" stroke="#fff" stroke-width="2"/>
+  
+  <!-- Text 'SRI' inside -->
+  <text x="50" y="60" font-family="Arial, sans-serif" font-weight="bold" font-size="35" text-anchor="middle" fill="white">SRI</text>
+  
+  <!-- Small leaf detail above text -->
+  <path d="M50 20 Q65 20 65 35 Q50 30 50 35 Q50 30 35 35 Q35 20 50 20" fill="white"/>
+</svg>

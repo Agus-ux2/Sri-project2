@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    /* SRI DESIGN SYSTEM */
+    --color-fondo: hsl(210, 10%, 23%);
+    --color-fondo-light: hsl(210, 10%, 30%);
+    --color-fondo-dark: hsl(210, 10%, 15%);
+
+    --color-primary: hsl(100, 45%, 48%);
+    --color-primary-light: hsl(100, 45%, 58%);
+    --color-primary-dark: hsl(100, 45%, 38%);
+    --color-primary-alpha: hsla(100, 45%, 48%, 0.1);
+
+    --color-success: hsl(142, 71%, 45%);
+    --color-error: hsl(4, 90%, 58%);
+    --color-neutral-50: hsl(0, 0%, 98%);
+    --color-neutral-100: hsl(0, 0%, 95%);
+    --color-neutral-200: hsl(0, 0%, 88%);
+    --color-neutral-300: hsl(0, 0%, 75%);
+    --color-neutral-400: hsl(0, 0%, 60%);
+    --color-neutral-500: hsl(0, 0%, 45%);
+    --color-neutral-600: hsl(0, 0%, 35%);
+    --color-neutral-700: hsl(0, 0%, 25%);
+    --color-neutral-800: hsl(210, 10%, 23%);
+    --color-neutral-900: hsl(210, 10%, 15%);
+
+    --font-sans: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* shadcn/ui variables */
+    --background: 0 0% 100%;
+    --foreground: 210 10% 23%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 10% 23%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 10% 23%;
+    --primary: 100 45% 48%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 210 10% 23%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 210 10% 23%;
+    --destructive: 4 90% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 100 45% 48%;
+    --radius: 0.5rem;
+}
+
+body {
+    background-color: var(--color-neutral-50);
+    color: var(--color-neutral-800);
+    font-family: var(--font-sans);
+}
+
+/* Custom CSS Classes from Identity */
+.btn-primary {
+    background: var(--color-primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-neutral-700);
+}
+
+.form-input {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--color-neutral-200);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+}
+
+/* Ensure flex items in zones don't inherit width: 100% in a way that breaks flex */
+.flex>.form-input {
+    width: auto;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-alpha);
+}
+
+.card {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    padding: 2rem;
+}

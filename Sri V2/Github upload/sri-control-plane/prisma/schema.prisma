@@ -1,0 +1,345 @@
+// Prisma Schema
+// Merged: Existing Control Plane Tables + Grain Quality System Tables
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// EXISTING SYSTEM TABLES (Mapped from SQL Migrations)
+// ============================================================================
+
+model SigningKey {
+  version   Int      @id
+  key       String   @db.VarChar(64)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  status    String   @db.VarChar(20) // 'active', 'deprecated', 'revoked'
+
+  @@index([status])
+  @@map("signing_keys")
+}
+
+model User {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  name         String   @db.VarChar(255)
+  username     String?  @db.VarChar(255)
+  company      String   @db.VarChar(255) // Existing string field
+  phone        String?  @db.VarChar(50)
+  role         String?  @default("user") @db.VarChar(50)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamptz
+
+  // Relations
+  productionZones ProductionZone[]
+  documents       Document[]
+  grainStocks     GrainStock[]
+  
+  // Relation to new Company model (optional, manual link for now)
+  // companyRel   Company? @relation(fields: [companyId], references: [id])
+  // companyId    String?
+
+  @@index([email])
+  @@map("users")
+}
+
+model ProductionZone {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  location    String   @db.VarChar(255)
+  hectares    Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  grainStocks GrainStock[]
+
+  @@index([userId])
+  @@map("production_zones")
+}
+
+model Document {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  originalName String   @map("original_name") @db.VarChar(255)
+  filePath     String   @map("file_path") @db.VarChar(255)
+  fileSize     BigInt   @map("file_size")
+  mimeType     String   @map("mime_type") @db.VarChar(100)
+  ocrStatus    String?  @default("pending") @map("ocr_status") @db.VarChar(20)
+  ocrData      Json?    @map("ocr_data")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([ocrStatus])
+  @@map("documents")
+}
+
+model GrainStock {
+  id                   Int      @id @default(autoincrement())
+  userId               String   @map("user_id") @db.Uuid // Fixed type to match User.id
+  productionZoneId     String   @map("production_zone_id") @db.Uuid // Fixed type to match ProductionZone.id
+  grainType            String   @map("grain_type") @db.VarChar(50)
+  campaign             String   @db.VarChar(20)
+  
+  initialStock         Decimal? @default(0) @map("initial_stock") @db.Decimal(15, 2)
+  soldDelivered        Decimal? @default(0) @map("sold_delivered") @db.Decimal(15, 2)
+  livestockConsumption Decimal? @default(0) @map("livestock_consumption") @db.Decimal(15, 2)
+  seeds                Decimal? @default(0) @map("seeds") @db.Decimal(15, 2)
+  extruderOwn          Decimal? @default(0) @map("extruder_own") @db.Decimal(15, 2)
+  extruderExchange     Decimal? @default(0) @map("extruder_exchange") @db.Decimal(15, 2)
+  exchanges            Decimal? @default(0) @map("exchanges") @db.Decimal(15, 2)
+  committedSales       Decimal? @default(0) @map("committed_sales") @db.Decimal(15, 2)
+
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamp
+  updatedAt            DateTime @default(now()) @map("updated_at") @db.Timestamp
+
+  // Relations
+  user           User           @relation(fields: [userId], references: [id])
+  productionZone ProductionZone @relation(fields: [productionZoneId], references: [id])
+
+  @@unique([productionZoneId, grainType, campaign])
+  @@map("grain_stocks")
+}
+
+// ============================================================================
+// NEW GRAIN QUALITY SYSTEM TABLES
+// ============================================================================
+
+model Company {
+  id                    String   @id @default(uuid())
+  name                  String
+  legalName             String?  @map("legal_name")
+  taxId                 String   @unique @map("tax_id")
+  email                 String?
+  phone                 String?
+  address               String?
+  city                  String?
+  province              String?
+  postalCode            String?  @map("postal_code")
+  companyType           String   @map("company_type") // 'producer', 'buyer', 'broker'
+  defaultCommissionPct  Decimal  @default(1.0) @map("default_commission_pct") @db.Decimal(5, 2)
+  active                Boolean  @default(true)
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+  createdBy             String?  @map("created_by")
+  
+  // Relations
+  settlements           Settlement[]
+  
+  @@index([taxId])
+  @@index([active])
+  @@map("companies")
+}
+
+model Settlement {
+  id                  String    @id @default(uuid())
+  settlementNumber    String    @unique @map("settlement_number")
+  companyId           String    @map("company_id")
+  settlementDate      DateTime  @map("settlement_date") @db.Date
+  operationDate       DateTime? @map("operation_date") @db.Date
+  paymentDate         DateTime? @map("payment_date") @db.Date
+  grainType           String    @map("grain_type") // 'soja', 'trigo', etc.
+  campaign            String?
+  basePricePerTon     Decimal   @map("base_price_per_ton") @db.Decimal(12, 2)
+  exchangeRate        Decimal?  @map("exchange_rate") @db.Decimal(10, 4)
+  totalGrossKg        Decimal   @map("total_gross_kg") @db.Decimal(12, 2)
+  totalNetKg          Decimal   @map("total_net_kg") @db.Decimal(12, 2)
+  totalWasteKg        Decimal   @map("total_waste_kg") @db.Decimal(12, 2)
+  averageFactor       Decimal?  @map("average_factor") @db.Decimal(6, 3)
+  grossAmount         Decimal   @map("gross_amount") @db.Decimal(15, 2)
+  commercialDiscount  Decimal   @default(0) @map("commercial_discount") @db.Decimal(15, 2)
+  commissionAmount    Decimal   @default(0) @map("commission_amount") @db.Decimal(15, 2)
+  paritariasAmount    Decimal   @default(0) @map("paritarias_amount") @db.Decimal(15, 2)
+  freightAmount       Decimal   @default(0) @map("freight_amount") @db.Decimal(15, 2)
+  netAmount           Decimal   @map("net_amount") @db.Decimal(15, 2)
+  originalPdfPath     String?   @map("original_pdf_path")
+  originalPdfHash     String?   @map("original_pdf_hash")
+  status              String    @default("draft") // 'draft', 'validated', 'paid', 'cancelled'
+  validatedAt         DateTime? @map("validated_at")
+  validatedBy         String?   @map("validated_by")
+  validationNotes     String?   @map("validation_notes")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  createdBy           String?   @map("created_by")
+  
+  // Relations
+  company             Company   @relation(fields: [companyId], references: [id])
+  ctgEntries          CtgEntry[]
+  
+  @@index([companyId])
+  @@index([settlementNumber])
+  @@index([settlementDate])
+  @@index([grainType])
+  @@index([status])
+  @@map("settlements")
+}
+
+model CtgEntry {
+  id                    String    @id @default(uuid())
+  settlementId          String    @map("settlement_id")
+  ctgNumber             String    @map("ctg_number")
+  cpNumber              String?   @map("cp_number")
+  establishment         String?
+  field                 String?
+  grossKg               Decimal   @map("gross_kg") @db.Decimal(12, 2)
+  netKg                 Decimal   @map("net_kg") @db.Decimal(12, 2)
+  wasteKg               Decimal   @map("waste_kg") @db.Decimal(12, 2)
+  factor                Decimal?  @db.Decimal(6, 3)
+  basePricePerTon       Decimal   @map("base_price_per_ton") @db.Decimal(12, 2)
+  adjustedPricePerTon   Decimal?  @map("adjusted_price_per_ton") @db.Decimal(12, 2)
+  commercialDiscount    Decimal   @default(0) @map("commercial_discount") @db.Decimal(12, 2)
+  freightPerTon         Decimal   @default(0) @map("freight_per_ton") @db.Decimal(12, 2)
+  grossAmount           Decimal?  @map("gross_amount") @db.Decimal(15, 2)
+  netAmount             Decimal?  @map("net_amount") @db.Decimal(15, 2)
+  lineNumber            Int?      @map("line_number")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  settlement            Settlement        @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+  qualityAnalyses       QualityAnalysis[]
+  qualityResults        QualityResult[]
+  
+  @@unique([settlementId, ctgNumber])
+  @@index([settlementId])
+  @@index([ctgNumber])
+  @@map("ctg_entries")
+}
+
+model QualityAnalysis {
+  id                  String    @id @default(uuid())
+  ctgEntryId          String?   @map("ctg_entry_id")
+  ctgNumber           String    @map("ctg_number")
+  grainType           String    @map("grain_type")
+  analysisDate        DateTime  @map("analysis_date") @db.Date
+  laboratory          String?
+  analyst             String?
+  certificateNumber   String?   @map("certificate_number")
+  
+  // Common Parameters
+  humidity            Decimal   @db.Decimal(5, 2)
+  foreignMatter       Decimal   @map("foreign_matter") @db.Decimal(5, 2)
+  damagedGrains       Decimal   @map("damaged_grains") @db.Decimal(5, 2)
+  
+  // Specific Parameters
+  hectoliterWeight    Decimal?  @map("hectoliter_weight") @db.Decimal(5, 2)
+  protein             Decimal?  @db.Decimal(5, 2)
+  fatContent          Decimal?  @map("fat_content") @db.Decimal(5, 2)
+  brokenGrains        Decimal?  @map("broken_grains") @db.Decimal(5, 2)
+  greenGrains         Decimal?  @map("green_grains") @db.Decimal(5, 2)
+  blackGrains         Decimal?  @map("black_grains") @db.Decimal(5, 2)
+  panzaBlanca         Decimal?  @map("panza_blanca") @db.Decimal(5, 2)
+  acidity             Decimal?  @db.Decimal(5, 2)
+  burnedGrains        Decimal?  @map("burned_grains") @db.Decimal(5, 2)
+  sproutedGrains      Decimal?  @map("sprouted_grains") @db.Decimal(5, 2)
+  pestDamaged         Decimal?  @map("pest_damaged") @db.Decimal(5, 2)
+  liveInsects         Boolean   @default(false) @map("live_insects")
+  chamicoSeedsPerKg   Int?      @map("chamico_seeds_per_kg")
+  
+  observations        String?
+  certificatePdfPath  String?   @map("certificate_pdf_path")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  ctgEntry            CtgEntry?        @relation(fields: [ctgEntryId], references: [id])
+  qualityResults      QualityResult[]
+  
+  @@index([ctgEntryId])
+  @@index([ctgNumber])
+  @@index([grainType])
+  @@index([analysisDate])
+  @@map("quality_analyses")
+}
+
+model QualityResult {
+  id                    String   @id @default(uuid())
+  analysisId            String   @map("analysis_id")
+  ctgEntryId            String?  @map("ctg_entry_id")
+  baseFactor            Decimal  @default(100.000) @map("base_factor") @db.Decimal(6, 3)
+  finalFactor           Decimal  @map("final_factor") @db.Decimal(6, 3)
+  grade                 String?
+  gradeAdjustment       Decimal  @default(0) @map("grade_adjustment") @db.Decimal(6, 3)
+  worstParameter        String?  @map("worst_parameter")
+  totalBonus            Decimal  @default(0) @map("total_bonus") @db.Decimal(6, 3)
+  bonusDetails          Json?    @map("bonus_details")
+  totalDiscount         Decimal  @default(0) @map("total_discount") @db.Decimal(6, 3)
+  discountDetails       Json?    @map("discount_details")
+  baseHumidity          Decimal? @map("base_humidity") @db.Decimal(5, 2)
+  actualHumidity        Decimal? @map("actual_humidity") @db.Decimal(5, 2)
+  dryingWastePct        Decimal? @map("drying_waste_pct") @db.Decimal(6, 3)
+  handlingWastePct      Decimal? @map("handling_waste_pct") @db.Decimal(6, 3)
+  totalWastePct         Decimal? @map("total_waste_pct") @db.Decimal(6, 3)
+  wasteKg               Decimal? @map("waste_kg") @db.Decimal(12, 2)
+  requiresDrying        Boolean? @map("requires_drying")
+  grossQuantityKg       Decimal? @map("gross_quantity_kg") @db.Decimal(12, 2)
+  netQuantityKg         Decimal? @map("net_quantity_kg") @db.Decimal(12, 2)
+  basePricePerTon       Decimal? @map("base_price_per_ton") @db.Decimal(12, 2)
+  adjustedPricePerTon   Decimal? @map("adjusted_price_per_ton") @db.Decimal(12, 2)
+  priceAdjustmentPct    Decimal? @map("price_adjustment_pct") @db.Decimal(6, 3)
+  grossAmount           Decimal? @map("gross_amount") @db.Decimal(15, 2)
+  netAmount             Decimal? @map("net_amount") @db.Decimal(15, 2)
+  outOfStandard         Boolean  @default(false) @map("out_of_standard")
+  outOfTolerance        Boolean  @default(false) @map("out_of_tolerance")
+  warnings              Json?
+  calculationVersion    String?  @map("calculation_version")
+  calculationDate       DateTime @default(now()) @map("calculation_date")
+  calculationSteps      Json?    @map("calculation_steps")
+  createdAt             DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  analysis              QualityAnalysis @relation(fields: [analysisId], references: [id])
+  ctgEntry              CtgEntry?       @relation(fields: [ctgEntryId], references: [id])
+  
+  @@unique([analysisId, ctgEntryId])
+  @@index([analysisId])
+  @@index([ctgEntryId])
+  @@index([finalFactor])
+  @@map("quality_results")
+}
+
+model MoistureWasteTable {
+  id            String   @id @default(uuid())
+  grainType     String   @map("grain_type")
+  humidity      Decimal  @db.Decimal(5, 2)
+  wastePercent  Decimal  @map("waste_percent") @db.Decimal(6, 3)
+  source        String?
+  effectiveDate DateTime? @map("effective_date") @db.Date
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  @@unique([grainType, humidity])
+  @@index([grainType])
+  @@index([humidity])
+  @@map("moisture_waste_tables")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id")
+  action      String
+  userId      String?  @map("user_id")
+  userEmail   String?  @map("user_email")
+  timestamp   DateTime @default(now())
+  oldValues   Json?    @map("old_values")
+  newValues   Json?    @map("new_values")
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  notes       String?
+  
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([timestamp])
+  @@map("audit_log")
+}
