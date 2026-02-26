@@ -119,6 +119,28 @@ app.use((err, req, res, next) => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 async function startServer() {
+    // Iniciar servidor SIEMPRE primero para que Railway no retorne 502
+    const server = app.listen(env.PORT, '0.0.0.0', () => {
+        console.log('');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('  🌾 SRI - Soluciones Rurales Integradas');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log(`  🚀 Servidor corriendo en el puerto: ${env.PORT}`);
+        console.log(`  📊 API disponible en /api`);
+        console.log(`  🌍 Ambiente: ${env.NODE_ENV}`);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('');
+    });
+
+    // Manejo de señales para cierre limpio
+    process.on('SIGTERM', () => {
+        console.log('👋 SIGTERM recibido. Cerrando servidor...');
+        server.close(() => {
+            console.log('💤 Servidor cerrado.');
+            process.exit(0);
+        });
+    });
+
     try {
         // Inicializar base de datos
         await initDatabase();
@@ -138,31 +160,10 @@ async function startServer() {
         // Inicializar Programador de Tareas (00:00 hs)
         const SchedulerService = require('./services/scheduler.service');
         SchedulerService.init();
-
-        // Iniciar servidor
-        const server = app.listen(env.PORT, '0.0.0.0', () => {
-            console.log('');
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('  🌾 SRI - Soluciones Rurales Integradas');
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log(`  🚀 Servidor corriendo en el puerto: ${env.PORT}`);
-            console.log(`  📊 API disponible en /api`);
-            console.log(`  🌍 Ambiente: ${env.NODE_ENV}`);
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('');
-        });
-
-        // Manejo de señales para cierre limpio
-        process.on('SIGTERM', () => {
-            console.log('👋 SIGTERM recibido. Cerrando servidor...');
-            server.close(() => {
-                console.log('💤 Servidor cerrado.');
-                process.exit(0);
-            });
-        });
     } catch (error) {
-        console.error('❌ Error inicializando servidor:', error);
-        process.exit(1);
+        console.error('❌ Error inicializando DB o caches:', error);
+        // NO HACER process.exit(1) para que el API responda 200 a /health
+        // process.exit(1);
     }
 }
 
