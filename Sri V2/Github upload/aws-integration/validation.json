@@ -1,0 +1,24 @@
+﻿[
+    {
+        "DomainName": "solucionesruralesintegradas.com.ar",
+        "ValidationDomain": "solucionesruralesintegradas.com.ar",
+        "ValidationStatus": "PENDING_VALIDATION",
+        "ResourceRecord": {
+            "Name": "_e63d315fdad79dfa4ffe80c21d0c3cca.solucionesruralesintegradas.com.ar.",
+            "Type": "CNAME",
+            "Value": "_1cffd4109dec8f39939964077bf7bebf.jkddzztszm.acm-validations.aws."
+        },
+        "ValidationMethod": "DNS"
+    },
+    {
+        "DomainName": "*.solucionesruralesintegradas.com.ar",
+        "ValidationDomain": "*.solucionesruralesintegradas.com.ar",
+        "ValidationStatus": "PENDING_VALIDATION",
+        "ResourceRecord": {
+            "Name": "_e63d315fdad79dfa4ffe80c21d0c3cca.solucionesruralesintegradas.com.ar.",
+            "Type": "CNAME",
+            "Value": "_1cffd4109dec8f39939964077bf7bebf.jkddzztszm.acm-validations.aws."
+        },
+        "ValidationMethod": "DNS"
+    }
+]

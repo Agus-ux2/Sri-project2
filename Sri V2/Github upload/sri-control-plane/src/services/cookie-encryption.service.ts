@@ -15,7 +15,7 @@ export class CookieEncryptionService {
 
     encrypt(data: any): string {
         const iv = crypto.randomBytes(16);
-        const cipher = crypto.createCipheriv(this.algorithm, this.encryptionKey, iv) as crypto.CipherGCM;
+        const cipher = crypto.createCipheriv(this.algorithm, this.encryptionKey, iv) as any;
 
         let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
         encrypted += cipher.final('hex');
@@ -32,7 +32,7 @@ export class CookieEncryptionService {
         const iv = Buffer.from(ivHex, 'hex');
         const tag = Buffer.from(tagHex, 'hex');
 
-        const decipher = crypto.createDecipheriv(this.algorithm, this.encryptionKey, iv) as crypto.DecipherGCM;
+        const decipher = crypto.createDecipheriv(this.algorithm, this.encryptionKey, iv) as any;
         decipher.setAuthTag(tag);
 
         let decrypted = decipher.update(encrypted, 'hex', 'utf8');

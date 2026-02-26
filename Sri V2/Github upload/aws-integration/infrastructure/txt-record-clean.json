@@ -1,0 +1,31 @@
+{
+    "Comment": "Clean validation for associate-alias",
+    "Changes": [
+        {
+            "Action": "DELETE",
+            "ResourceRecordSet": {
+                "Name": "_cloudfront.solucionesruralesintegradas.com.ar.",
+                "Type": "TXT",
+                "TTL": 300,
+                "ResourceRecords": [
+                    {
+                        "Value": "\"d1l70dzd9x9vm8.cloudfront.net\""
+                    }
+                ]
+            }
+        },
+        {
+            "Action": "UPSERT",
+            "ResourceRecordSet": {
+                "Name": "_cloudfront.www.solucionesruralesintegradas.com.ar.",
+                "Type": "TXT",
+                "TTL": 300,
+                "ResourceRecords": [
+                    {
+                        "Value": "\"d1l70dzd9x9vm8.cloudfront.net\""
+                    }
+                ]
+            }
+        }
+    ]
+}

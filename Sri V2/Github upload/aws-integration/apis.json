@@ -1,0 +1,26 @@
+﻿{
+    "items": [
+        {
+            "id": "cdxoud6wm6",
+            "name": "SRI Control Plane API",
+            "createdDate": "2026-02-05T19:34:49-03:00",
+            "version": "1.0",
+            "apiKeySource": "HEADER",
+            "endpointConfiguration": {
+                "types": [
+                    "EDGE"
+                ],
+                "ipAddressType": "ipv4"
+            },
+            "tags": {
+                "aws:cloudformation:logical-id": "SriApi",
+                "aws:cloudformation:stack-id": "arn:aws:cloudformation:us-east-1:248825820462:stack/sri-control-plane-prod/ca1d5360-02e2-11f1-8dd0-0affdf3e2909",
+                "aws:cloudformation:stack-name": "sri-control-plane-prod"
+            },
+            "disableExecuteApiEndpoint": false,
+            "rootResourceId": "245wln8k3h",
+            "securityPolicy": "TLS_1_0",
+            "apiStatus": "AVAILABLE"
+        }
+    ]
+}

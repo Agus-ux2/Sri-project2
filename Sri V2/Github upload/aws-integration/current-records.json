@@ -1,0 +1,43 @@
+﻿{
+    "ResourceRecordSets": [
+        {
+            "Name": "solucionesruralesintegradas.com.ar.",
+            "Type": "NS",
+            "TTL": 172800,
+            "ResourceRecords": [
+                {
+                    "Value": "ns-1688.awsdns-19.co.uk."
+                },
+                {
+                    "Value": "ns-527.awsdns-01.net."
+                },
+                {
+                    "Value": "ns-194.awsdns-24.com."
+                },
+                {
+                    "Value": "ns-1522.awsdns-62.org."
+                }
+            ]
+        },
+        {
+            "Name": "solucionesruralesintegradas.com.ar.",
+            "Type": "SOA",
+            "TTL": 900,
+            "ResourceRecords": [
+                {
+                    "Value": "ns-1688.awsdns-19.co.uk. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400"
+                }
+            ]
+        },
+        {
+            "Name": "_e63d315fdad79dfa4ffe80c21d0c3cca.solucionesruralesintegradas.com.ar.",
+            "Type": "CNAME",
+            "TTL": 300,
+            "ResourceRecords": [
+                {
+                    "Value": "_1cffd4109dec8f39939964077bf7bebf.jkddzztszm.acm-validations.aws."
+                }
+            ]
+        }
+    ]
+}

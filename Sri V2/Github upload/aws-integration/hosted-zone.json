@@ -1,0 +1,25 @@
+﻿{
+    "Location": "https://route53.amazonaws.com/2013-04-01/hostedzone/Z0346583DBV5ZUS1R4H4",
+    "HostedZone": {
+        "Id": "/hostedzone/Z0346583DBV5ZUS1R4H4",
+        "Name": "solucionesruralesintegradas.com.ar.",
+        "CallerReference": "sri-20260206162904",
+        "Config": {
+            "PrivateZone": false
+        },
+        "ResourceRecordSetCount": 2
+    },
+    "ChangeInfo": {
+        "Id": "/change/C08289972MMHKOZ8PPRRL",
+        "Status": "PENDING",
+        "SubmittedAt": "2026-02-06T19:29:05.225000+00:00"
+    },
+    "DelegationSet": {
+        "NameServers": [
+            "ns-1688.awsdns-19.co.uk",
+            "ns-527.awsdns-01.net",
+            "ns-194.awsdns-24.com",
+            "ns-1522.awsdns-62.org"
+        ]
+    }
+}

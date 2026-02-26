@@ -1,0 +1,310 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SRI Control Plane - Grain Quality System API
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        DATABASE_URL:
+          Ref: DatabaseUrl
+        SETTLEMENTS_BUCKET:
+          Ref: SettlementsBucket
+        NODE_ENV: production
+    VpcConfig:
+      SecurityGroupIds:
+      - Ref: LambdaSecurityGroup
+      SubnetIds:
+      - Ref: PrivateSubnet1
+      - Ref: PrivateSubnet2
+Parameters:
+  DatabaseUrl:
+    Type: String
+    Description: PostgreSQL connection string
+    NoEcho: true
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC for Lambda functions
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private subnet 1
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private subnet 2
+  CognitoUserPoolArn:
+    Type: String
+    Description: Cognito User Pool ARN for authorization
+Resources:
+  SettlementsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Sub: sri-settlements-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+    Metadata:
+      SamResourceId: SettlementsBucket
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for SRI Lambda functions
+      VpcId:
+        Ref: VpcId
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: '0.0.0.0/0'
+    Metadata:
+      SamResourceId: LambdaSecurityGroup
+  SriApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: SRI Control Plane API
+      StageName: prod
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn:
+              Ref: CognitoUserPoolArn
+      Cors:
+        AllowMethods: '''GET,POST,PUT,DELETE,OPTIONS'''
+        AllowHeaders: '''Content-Type,Authorization,X-Tenant-Id'''
+        AllowOrigin: '''*'''
+    Metadata:
+      SamResourceId: SriApi
+  PrismaLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: prisma-client
+      Description: Prisma Client for PostgreSQL
+      ContentUri: s3://aws-sam-cli-managed-default-samclisourcebucket-nnozdqawcthy/5281f4096061da75af1685a9dea52148
+      CompatibleRuntimes:
+      - nodejs18.x
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: PrismaLayer
+  SettlementsUploadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: sri-settlements-upload
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-nnozdqawcthy/e925973e1a9e7f5084299283228e51b4
+      Handler: index.handler
+      Timeout: 300
+      MemorySize: 1024
+      Layers:
+      - Ref: PrismaLayer
+      Policies:
+      - S3CrudPolicy:
+          BucketName:
+            Ref: SettlementsBucket
+      - VPCAccessPolicy: {}
+      Events:
+        UploadSettlement:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /settlements/upload
+            Method: POST
+    Metadata:
+      SamResourceId: SettlementsUploadFunction
+  SettlementsListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: sri-settlements-list
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-nnozdqawcthy/8bec08c59f9c9d5b5c7f719191981b03
+      Handler: index.handler
+      Layers:
+      - Ref: PrismaLayer
+      Policies:
+      - VPCAccessPolicy: {}
+      Events:
+        ListSettlements:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /settlements
+            Method: GET
+    Metadata:
+      SamResourceId: SettlementsListFunction
+  SettlementsDetailFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: sri-settlements-detail
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-nnozdqawcthy/42fca72fdea3da3a742fc148c1824af2
+      Handler: index.handler
+      Layers:
+      - Ref: PrismaLayer
+      Policies:
+      - VPCAccessPolicy: {}
+      Events:
+        GetSettlement:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /settlements/{id}
+            Method: GET
+    Metadata:
+      SamResourceId: SettlementsDetailFunction
+  SettlementsRecalculateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: sri-settlements-recalculate
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-nnozdqawcthy/d4a008fb143a580283d2e4107a6b52bb
+      Handler: index.handler
+      Timeout: 300
+      MemorySize: 1024
+      Layers:
+      - Ref: PrismaLayer
+      Policies:
+      - VPCAccessPolicy: {}
+      Events:
+        RecalculateSettlement:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /settlements/{id}/recalculate
+            Method: POST
+    Metadata:
+      SamResourceId: SettlementsRecalculateFunction
+  QualityCalculateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: sri-quality-calculate
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-nnozdqawcthy/b69b0548e359da4576111d6f8ecec80a
+      Handler: index.handler
+      Layers:
+      - Ref: PrismaLayer
+      Policies:
+      - VPCAccessPolicy: {}
+      Events:
+        GetQuality:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /ctgs/{ctgNumber}/quality
+            Method: GET
+    Metadata:
+      SamResourceId: QualityCalculateFunction
+  DocumentsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: sri-documents-handler
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-nnozdqawcthy/8169cf47c2bab6f289bb063e502a0704
+      Handler: index.handler
+      Layers:
+      - Ref: PrismaLayer
+      Policies:
+      - S3CrudPolicy:
+          BucketName:
+            Ref: SettlementsBucket
+      - VPCAccessPolicy: {}
+      Events:
+        ListDocuments:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /documents
+            Method: GET
+        UploadDocument:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /documents/upload
+            Method: POST
+    Metadata:
+      SamResourceId: DocumentsFunction
+  StocksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: sri-stocks-handler
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-nnozdqawcthy/33eb6bf10fbfcbed36c4ab3a577bdef4
+      Handler: index.handler
+      Layers:
+      - Ref: PrismaLayer
+      Policies:
+      - VPCAccessPolicy: {}
+      Events:
+        ListStocks:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /stocks
+            Method: GET
+        UpdateStocks:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /stocks
+            Method: POST
+    Metadata:
+      SamResourceId: StocksFunction
+  ProvidersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: sri-providers-handler
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-nnozdqawcthy/c395bbe39cac179f78423e2bb8261381
+      Handler: index.handler
+      Events:
+        ListProviders:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /providers/list
+            Method: GET
+        ConnectProvider:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /providers/connect
+            Method: POST
+        ForceConnectProvider:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /providers/force-connect
+            Method: POST
+        DisconnectProvider:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: SriApi
+            Path: /providers/delete/{id}
+            Method: DELETE
+    Metadata:
+      SamResourceId: ProvidersFunction
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value:
+      Fn::Sub: https://${SriApi}.execute-api.${AWS::Region}.amazonaws.com/prod/
+  SettlementsBucketName:
+    Description: S3 bucket for settlement PDFs
+    Value:
+      Ref: SettlementsBucket
+  SettlementsUploadArn:
+    Description: ARN of settlements-upload Lambda
+    Value:
+      Fn::GetAtt:
+      - SettlementsUploadFunction
+      - Arn

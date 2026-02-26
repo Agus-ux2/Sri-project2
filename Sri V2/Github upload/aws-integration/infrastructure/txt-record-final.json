@@ -1,0 +1,18 @@
+{
+    "Comment": "Final attempt validation for associate-alias",
+    "Changes": [
+        {
+            "Action": "UPSERT",
+            "ResourceRecordSet": {
+                "Name": "_www.solucionesruralesintegradas.com.ar.",
+                "Type": "TXT",
+                "TTL": 300,
+                "ResourceRecords": [
+                    {
+                        "Value": "\"d1l70dzd9x9vm8.cloudfront.net\""
+                    }
+                ]
+            }
+        }
+    ]
+}
