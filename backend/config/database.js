@@ -129,6 +129,39 @@ async function createTables(client) {
             )
         `);
 
+    // Tablas nuevas para Mis Granos V2
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS production_zones (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            name VARCHAR(255) NOT NULL,
+            location VARCHAR(255),
+            hectares DECIMAL(10, 2),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS grain_stocks (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            production_zone_id INTEGER REFERENCES production_zones(id) ON DELETE CASCADE,
+            grain_type VARCHAR(100) NOT NULL,
+            campaign VARCHAR(50) NOT NULL,
+            initial_stock DECIMAL(15, 2) DEFAULT 0,
+            sold_delivered DECIMAL(15, 2) DEFAULT 0,
+            livestock_consumption DECIMAL(15, 2) DEFAULT 0,
+            seeds DECIMAL(15, 2) DEFAULT 0,
+            extruder_own DECIMAL(15, 2) DEFAULT 0,
+            extruder_exchange DECIMAL(15, 2) DEFAULT 0,
+            exchanges DECIMAL(15, 2) DEFAULT 0,
+            committed_sales DECIMAL(15, 2) DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, production_zone_id, grain_type, campaign)
+        )
+    `);
+
     console.log('✅ Tablas PostgreSQL creadas correctamente');
   } catch (error) {
     console.error('Error creando tablas:', error);

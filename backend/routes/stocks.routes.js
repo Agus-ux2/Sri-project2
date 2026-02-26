@@ -16,4 +16,10 @@ const router = express.Router();
  */
 router.get('/', authMiddleware, StocksController.list);
 
+/**
+ * POST /api/stocks
+ * Insertar o actualizar registro de stock
+ */
+router.post('/', authMiddleware, StocksController.upsert);
+
 module.exports = router;

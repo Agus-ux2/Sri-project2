@@ -154,13 +154,33 @@ class AuthController {
             if (!user) {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
+
+            const { query } = require('../config/database');
+            let zones = [];
+            try {
+                const zRes = await query('SELECT * FROM production_zones WHERE user_id = $1', [req.user.id]);
+                zones = zRes.rows;
+
+                // Si el usuario no tiene zonas de producción, crear una por defecto
+                if (zones.length === 0) {
+                    const defaultZone = await query(`
+                        INSERT INTO production_zones (user_id, name, location, hectares)
+                        VALUES ($1, 'Establecimiento Principal', 'Sede Central', 500)
+                        RETURNING *
+                    `, [req.user.id]);
+                    zones = [defaultZone.rows[0]];
+                }
+            } catch (e) {
+                console.error('Error fetching/creating zones in auth/me:', e);
+            }
+
             res.json({
                 id: user.id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
                 created_at: user.created_at,
-                zones: [] // mock ocr zones as empty if not handled here
+                zones: zones
             });
         } catch (error) {
             console.error('Error en auth/me:', error);
