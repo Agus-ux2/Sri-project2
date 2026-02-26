@@ -6,6 +6,7 @@
 
 const express = require('express');
 const AuthController = require('../controllers/auth.controller');
+const authMiddleware = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
@@ -20,6 +21,12 @@ router.post('/register', AuthController.register);
  * Iniciar sesión
  */
 router.post('/login', AuthController.login);
+
+/**
+ * GET /api/auth/me
+ * Obtener perfil del usuario actual (alias para el dashboard de React)
+ */
+router.get('/me', authMiddleware, AuthController.me);
 
 /**
  * POST /api/auth/verify-email

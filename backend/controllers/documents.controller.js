@@ -78,7 +78,7 @@ class DocumentsController {
                     file_type: doc.file_type,
                     file_size: doc.file_size,
                     ocr_status: doc.ocr_status,
-                    ocr_data: doc.ocr_data ? JSON.parse(doc.ocr_data) : null,
+                    ocr_data: (typeof doc.ocr_data === 'string') ? JSON.parse(doc.ocr_data) : doc.ocr_data,
                     created_at: doc.created_at
                 }))
             });
@@ -118,7 +118,7 @@ class DocumentsController {
                     file_type: document.file_type,
                     file_size: document.file_size,
                     ocr_status: document.ocr_status,
-                    ocr_data: document.ocr_data ? JSON.parse(document.ocr_data) : null,
+                    ocr_data: (typeof document.ocr_data === 'string') ? JSON.parse(document.ocr_data) : document.ocr_data,
                     created_at: document.created_at
                 }
             });

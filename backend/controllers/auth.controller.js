@@ -144,6 +144,29 @@ class AuthController {
             message: 'Recuperación de contraseña - En desarrollo'
         });
     }
+
+    /**
+     * Obtener el usuario actual
+     */
+    static async me(req, res) {
+        try {
+            const user = await UserModel.findById(req.user.id);
+            if (!user) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+            res.json({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                created_at: user.created_at,
+                zones: [] // mock ocr zones as empty if not handled here
+            });
+        } catch (error) {
+            console.error('Error en auth/me:', error);
+            res.status(500).json({ error: 'Error al obtener usuario' });
+        }
+    }
 }
 
 module.exports = AuthController;

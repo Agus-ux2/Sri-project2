@@ -102,16 +102,41 @@ class UploadController {
 
                     const isPdfOrImage = (file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/')) && !isExcelOrTxt;
 
-                    if (isPdfOrImage) {
-                        // Usar OCR (Nanonets o Local)
-                        let fileToProcess = uploadResult.url;
-                        if (uploadResult.storage_type === 'local') {
-                            fileToProcess = file.path;
+                    const env = require('../config/env');
+                    const isSupportedExtension = ['.xlsx', '.xls', '.pdf', '.jpg', '.png', '.jpeg'].includes(ext);
+                    const hasNanonetsKeys = env.NANONETS_API_KEY && env.NANONETS_MODEL_ID;
+
+                    const useNanonets = hasNanonetsKeys && isSupportedExtension;
+
+                    console.log(`🤖 Debug Nanonets Decision:`);
+                    console.log(`   - File Ext: ${ext}`);
+                    console.log(`   - Supported Ext: ${isSupportedExtension}`);
+                    console.log(`   - Has Keys: ${hasNanonetsKeys} (Key: ${!!env.NANONETS_API_KEY}, Model: ${!!env.NANONETS_MODEL_ID})`);
+                    console.log(`   - Will Use Nanonets: ${useNanonets}`);
+
+                    if (useNanonets) {
+                        try {
+                            console.log('🤖 Intentando Nanonets para:', file.originalname);
+                            // Usar URL remota (Cloudinary)
+                            result = await OCRService.processWithNanonets(uploadResult.url, docType);
+                        } catch (e) {
+                            console.warn('⚠️ Nanonets falló, intentando fallback local:', e.message);
                         }
-                        result = await OCRService.processPDF(fileToProcess, docType);
-                    } else {
-                        // Usar Parser (Excel/Txt)
-                        result = await ParserService.processFile(file.path, file.mimetype);
+                    } else if (!hasNanonetsKeys) {
+                        console.warn('⚠️ Nanonets saltado: Falta API Key o Model ID en variables de entorno.');
+                    }
+
+                    // Si no hubo resultado (Nanonets falló o no estaba config), usar Fallback Local
+                    if (!result) {
+                        if (isExcelOrTxt) {
+                            console.log('📊 Usando Parser Local (Excel/Txt)');
+                            result = await ParserService.processFile(file.path, file.mimetype);
+                        } else {
+                            // PDF o Imagen Local (Regex)
+                            console.log('📄 Usando OCR Service (Hybrid/Local)');
+                            let fileToProcess = uploadResult.storage_type === 'local' ? file.path : uploadResult.url;
+                            result = await OCRService.processPDF(fileToProcess, docType);
+                        }
                     }
 
                     result.filename = file.originalname;

@@ -23,7 +23,14 @@ function initDatabase() {
         connectionString: connectionString,
         ssl: process.env.NODE_ENV === 'production' ? {
           rejectUnauthorized: false
-        } : false
+        } : false,
+        connectionTimeoutMillis: 5000,  // 5 second timeout for getting connection
+        idleTimeoutMillis: 30000,       // 30 seconds before idle client is closed
+        max: 10,                         // maximum number of clients
+        statement_timeout: 10000,        // 10 second query timeout
+        query_timeout: 10000,
+        keepAlive: true,
+        keepAliveInitialDelayMillis: 10000
       });
 
       // Verificar conexión

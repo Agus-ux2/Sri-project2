@@ -6,6 +6,9 @@
 
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
+require('../debug_config'); // Debug vars
+const http = require('http');
 const path = require('path');
 const fs = require('fs');
 
@@ -64,6 +67,7 @@ const documentsRoutes = require('./routes/documents.routes');
 const ocrRoutes = require('./routes/ocr.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const providersRoutes = require('./routes/providers.routes');
+const stocksRoutes = require('./routes/stocks.routes');
 
 // Registrar rutas
 app.use('/api/auth', authRoutes);
@@ -71,6 +75,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/ocr', ocrRoutes);
 app.use('/api/providers', providersRoutes);
+app.use('/api/stocks', stocksRoutes);
 app.use('/api', uploadRoutes); // Para /api/upload
 
 // Ruta para admin (si existe el archivo)
