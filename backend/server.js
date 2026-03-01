@@ -29,8 +29,26 @@ const app = express();
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 // CORS
+const allowedOrigins = [
+    env.FRONTEND_URL,
+    'http://localhost:3000',
+    'https://solucionesruralesintegradas.com.ar',
+    'https://www.solucionesruralesintegradas.com.ar',
+    // Dominios Vercel / Cloudfront temporales si hiciera falta
+];
+
 app.use(cors({
-    origin: env.FRONTEND_URL,
+    origin: function (origin, callback) {
+        // Permitir peticiones sin origin (ej: mobile apps, curl)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.railway.app')) {
+            callback(null, true);
+        } else {
+            console.log('Bloqueado por CORS:', origin);
+            callback(new Error('No permitido por CORS'));
+        }
+    },
     credentials: true
 }));
 
